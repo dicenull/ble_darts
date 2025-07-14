@@ -1,8 +1,12 @@
+import 'package:ble_darts/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as fbs;
 import 'package:flutter_web_bluetooth/flutter_web_bluetooth.dart' as fwb;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_platform/universal_platform.dart';
+
+const dartsLiveHomeCharacteristic = '6e40fff6-b5a3-f393-e0a9-e50e24dcca9e';
+const dartsLiveHomeService = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 
 void main() {
   runApp(const MyApp());
@@ -131,7 +135,9 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
   void _scanForWebDevices() async {
     try {
       final device = await fwb.FlutterWebBluetooth.instance.requestDevice(
-        fwb.RequestOptionsBuilder.acceptAllDevices(optionalServices: []),
+        fwb.RequestOptionsBuilder.acceptAllDevices(
+          optionalServices: [dartsLiveHomeService],
+        ),
       );
 
       setState(() {
@@ -153,6 +159,34 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
       await device.connect();
       setState(() {
         _connectedWebDevice = device;
+      });
+
+      final services = await device.discoverServices();
+      final service = services.first;
+
+      // Now get the characteristic
+      final characteristic = await service.getCharacteristic(
+        dartsLiveHomeCharacteristic,
+      );
+      await characteristic.startNotifications();
+      characteristic.value.listen((value) {
+        final list = value.buffer.asUint8List().toList();
+        final receivedText = dat[list[2]];
+        setState(() {
+          _receivedData.add(
+            '${DateTime.now().toString().substring(11, 19)}: $receivedText',
+          );
+        });
+        // 自動スクロール
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
       });
 
       // Web用のデータ受信設定（実装例）
