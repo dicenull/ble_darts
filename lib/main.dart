@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ble_darts/bluetooth_manager.dart';
 import 'package:ble_darts/widgets/bluetooth_widgets.dart';
+import 'package:ble_darts/screens/game_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_platform/universal_platform.dart';
 
@@ -123,6 +124,17 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  void _navigateToGameScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GameScreen(
+          bluetoothManager: _bluetoothManager,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -182,6 +194,19 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
               receivedData: _receivedData,
               scrollController: _scrollController,
               onClear: _clearData,
+            ),
+          
+          // ゲームボタン
+          if (_bluetoothManager.isConnected)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: ElevatedButton(
+                onPressed: () => _navigateToGameScreen(),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+                child: const Text('ゲームを開始'),
+              ),
             ),
         ],
       ),
