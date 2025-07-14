@@ -41,6 +41,10 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
   List<fwb.BluetoothDevice> _webDevicesList = [];
   fwb.BluetoothDevice? _connectedWebDevice;
 
+  // 受信データ用
+  final List<String> _receivedData = [];
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -94,6 +98,26 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
         _connectedDevice = device;
       });
 
+      // データ受信のリスナーを設定
+      connection!.input!.listen((data) {
+        String receivedText = String.fromCharCodes(data);
+        setState(() {
+          _receivedData.add(
+            '${DateTime.now().toString().substring(11, 19)}: $receivedText',
+          );
+        });
+        // 自動スクロール
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+      });
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('${device.name}に接続しました')));
@@ -131,6 +155,10 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
         _connectedWebDevice = device;
       });
 
+      // Web用のデータ受信設定（実装例）
+      // 実際の実装では、特定のサービスとキャラクタリスティックを使用します
+      _setupWebDataReceiving(device);
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('${device.name}に接続しました')));
@@ -138,6 +166,19 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('接続に失敗しました: $e')));
+    }
+  }
+
+  void _setupWebDataReceiving(fwb.BluetoothDevice device) async {
+    try {
+      // サンプルデータの追加（実際の実装では実際のBLEサービスからデータを受信）
+      setState(() {
+        _receivedData.add(
+          '${DateTime.now().toString().substring(11, 19)}: Web接続完了',
+        );
+      });
+    } catch (e) {
+      print('データ受信設定エラー: $e');
     }
   }
 
@@ -158,6 +199,11 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
         });
       }
     }
+
+    // 受信データをクリア
+    setState(() {
+      _receivedData.clear();
+    });
 
     ScaffoldMessenger.of(
       context,
@@ -217,10 +263,91 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
 
           // デバイス一覧
           Expanded(
+            flex: 1,
             child: UniversalPlatform.isWeb
                 ? _buildWebDevicesList()
                 : _buildMobileDevicesList(),
           ),
+
+          // 受信データ表示エリア
+          if ((UniversalPlatform.isWeb && _connectedWebDevice != null) ||
+              (!UniversalPlatform.isWeb && _connectedDevice != null))
+            Container(
+              height: 300,
+              margin: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(7),
+                        topRight: Radius.circular(7),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          '受信データ',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _receivedData.clear();
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(60, 30),
+                          ),
+                          child: const Text('クリア'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: _receivedData.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'データを受信していません',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          )
+                        : ListView.builder(
+                            controller: _scrollController,
+                            itemCount: _receivedData.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: Colors.grey.shade200,
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  _receivedData[index],
+                                  style: const TextStyle(
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -276,6 +403,7 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
   @override
   void dispose() {
     connection?.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 }
