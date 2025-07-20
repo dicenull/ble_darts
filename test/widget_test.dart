@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ble_darts/main.dart';
 
 void main() {
-  testWidgets('BLE Darts app smoke test', (WidgetTester tester) async {
+  testWidgets('BLE Dartsアプリのスモークテスト', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(
       const ProviderScope(
