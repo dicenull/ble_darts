@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../models/count_up_game.dart';
 
 class ScoreDisplayWidget extends StatelessWidget {
   final CountUpGame game;
 
-  const ScoreDisplayWidget({
-    super.key,
-    required this.game,
-  });
+  const ScoreDisplayWidget({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +20,7 @@ class ScoreDisplayWidget extends StatelessWidget {
               children: [
                 Text(
                   '合計スコア',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                 ),
                 Text(
                   game.totalScore.toString(),
@@ -43,7 +38,7 @@ class ScoreDisplayWidget extends StatelessWidget {
               children: [
                 _buildStatItem('ラウンド', '${game.currentRound}/8'),
                 _buildStatItem('投射', '${game.currentThrow}/3'),
-                _buildStatItem('平均', '${game.averageScore.toStringAsFixed(1)}'),
+                _buildStatItem('平均', game.averageScore.toStringAsFixed(1)),
               ],
             ),
           ],
@@ -55,20 +50,11 @@ class ScoreDisplayWidget extends StatelessWidget {
   Widget _buildStatItem(String label, String value) {
     return Column(
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -78,10 +64,7 @@ class ScoreDisplayWidget extends StatelessWidget {
 class RoundScoresWidget extends StatelessWidget {
   final CountUpGame game;
 
-  const RoundScoresWidget({
-    super.key,
-    required this.game,
-  });
+  const RoundScoresWidget({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
@@ -94,10 +77,7 @@ class RoundScoresWidget extends StatelessWidget {
           children: [
             const Text(
               'ラウンド別スコア',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             GridView.builder(
@@ -112,25 +92,26 @@ class RoundScoresWidget extends StatelessWidget {
               itemCount: CountUpGame.maxRounds,
               itemBuilder: (context, index) {
                 final roundNumber = index + 1;
-                final roundScore = game.roundScores.length > index 
-                    ? game.roundScores[index] 
+                final roundScore = game.roundScores.length > index
+                    ? game.roundScores[index]
                     : 0;
-                final isCurrentRound = roundNumber == game.currentRound && game.isGameActive;
+                final isCurrentRound =
+                    roundNumber == game.currentRound && game.isGameActive;
                 final isCompleted = game.rounds[index].isNotEmpty;
 
                 return Container(
                   decoration: BoxDecoration(
-                    color: isCurrentRound 
-                        ? Colors.blue[50] 
-                        : isCompleted 
-                            ? Colors.green[50] 
-                            : Colors.grey[100],
+                    color: isCurrentRound
+                        ? Colors.blue[50]
+                        : isCompleted
+                        ? Colors.green[50]
+                        : Colors.grey[100],
                     border: Border.all(
-                      color: isCurrentRound 
-                          ? Colors.blue 
-                          : isCompleted 
-                              ? Colors.green 
-                              : Colors.grey,
+                      color: isCurrentRound
+                          ? Colors.blue
+                          : isCompleted
+                          ? Colors.green
+                          : Colors.grey,
                     ),
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -139,10 +120,7 @@ class RoundScoresWidget extends StatelessWidget {
                     children: [
                       Text(
                         'R$roundNumber',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -150,11 +128,11 @@ class RoundScoresWidget extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: isCurrentRound 
-                              ? Colors.blue 
-                              : isCompleted 
-                                  ? Colors.green 
-                                  : Colors.grey,
+                          color: isCurrentRound
+                              ? Colors.blue
+                              : isCompleted
+                              ? Colors.green
+                              : Colors.grey,
                         ),
                       ),
                     ],
@@ -172,10 +150,7 @@ class RoundScoresWidget extends StatelessWidget {
 class CurrentRoundWidget extends StatelessWidget {
   final CountUpGame game;
 
-  const CurrentRoundWidget({
-    super.key,
-    required this.game,
-  });
+  const CurrentRoundWidget({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
@@ -194,10 +169,7 @@ class CurrentRoundWidget extends StatelessWidget {
           children: [
             Text(
               '現在のラウンド (${game.currentRound}/8)',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Row(
@@ -211,17 +183,17 @@ class CurrentRoundWidget extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: hasThrow 
-                        ? Colors.green[50] 
-                        : isCurrentThrow 
-                            ? Colors.blue[50] 
-                            : Colors.grey[100],
+                    color: hasThrow
+                        ? Colors.green[50]
+                        : isCurrentThrow
+                        ? Colors.blue[50]
+                        : Colors.grey[100],
                     border: Border.all(
-                      color: hasThrow 
-                          ? Colors.green 
-                          : isCurrentThrow 
-                              ? Colors.blue 
-                              : Colors.grey,
+                      color: hasThrow
+                          ? Colors.green
+                          : isCurrentThrow
+                          ? Colors.blue
+                          : Colors.grey,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(8),
@@ -231,10 +203,7 @@ class CurrentRoundWidget extends StatelessWidget {
                     children: [
                       Text(
                         '投射$throwNumber',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 4),
                       if (hasThrow) ...[
@@ -299,18 +268,11 @@ class GameResultWidget extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Icon(
-              Icons.emoji_events,
-              size: 48,
-              color: Colors.orange,
-            ),
+            const Icon(Icons.emoji_events, size: 48, color: Colors.orange),
             const SizedBox(height: 16),
             const Text(
               'ゲーム終了！',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Text(
@@ -325,10 +287,16 @@ class GameResultWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildResultStat('平均', '${game.averageScore.toStringAsFixed(1)}'),
-                _buildResultStat('最高ラウンド', '${roundScores.isNotEmpty ? roundScores.reduce((a, b) => a > b ? a : b) : 0}'),
+                _buildResultStat('平均', game.averageScore.toStringAsFixed(1)),
+                _buildResultStat(
+                  '最高ラウンド',
+                  '${roundScores.isNotEmpty ? roundScores.reduce((a, b) => a > b ? a : b) : 0}',
+                ),
                 if (duration != null)
-                  _buildResultStat('時間', '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}'),
+                  _buildResultStat(
+                    '時間',
+                    '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
+                  ),
               ],
             ),
             const SizedBox(height: 24),
@@ -348,20 +316,11 @@ class GameResultWidget extends StatelessWidget {
   Widget _buildResultStat(String label, String value) {
     return Column(
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ],
     );

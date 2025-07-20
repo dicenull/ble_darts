@@ -129,9 +129,9 @@ class WebBluetoothManager implements BluetoothManager {
   @override
   Future<void> initialize() async {
     if (fwb.FlutterWebBluetooth.instance.isBluetoothApiSupported) {
-      print('Web Bluetooth API is supported');
+      return;
     } else {
-      print('Web Bluetooth API is not supported');
+      throw Exception('Web Bluetooth API is not supported');
     }
   }
 

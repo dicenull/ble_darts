@@ -1,7 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../domain/count_up_game.dart';
+
 import '../../../shared/models/dart_throw.dart';
 import '../../bluetooth/data/bluetooth_provider.dart';
+import '../domain/count_up_game.dart';
 
 part 'count_up_provider.g.dart';
 
@@ -29,14 +30,14 @@ class CountUpGameNotifier extends _$CountUpGameNotifier {
       }
     } catch (e) {
       // エラーログ（本番環境では適切なログシステムを使用）
-      print('Error processing dart throw: $e');
+      rethrow;
     }
   }
 
   String? _extractDartPosition(String rawData) {
     final timestampRegex = RegExp(r'\d{2}:\d{2}:\d{2}: (.+)');
     final match = timestampRegex.firstMatch(rawData);
-    
+
     if (match != null) {
       final position = match.group(1)?.trim();
       if (position != null && position.isNotEmpty && position != 'Web接続完了') {
@@ -98,11 +99,13 @@ class GameStatisticsData {
     required this.isCompleted,
   });
 
-  int get highestRoundScore => roundScores.isNotEmpty ? roundScores.reduce((a, b) => a > b ? a : b) : 0;
-  
-  int get lowestRoundScore => roundScores.isNotEmpty ? roundScores.reduce((a, b) => a < b ? a : b) : 0;
-  
-  double get averageRoundScore => roundScores.isNotEmpty 
-    ? roundScores.reduce((a, b) => a + b) / roundScores.length 
-    : 0.0;
+  int get highestRoundScore =>
+      roundScores.isNotEmpty ? roundScores.reduce((a, b) => a > b ? a : b) : 0;
+
+  int get lowestRoundScore =>
+      roundScores.isNotEmpty ? roundScores.reduce((a, b) => a < b ? a : b) : 0;
+
+  double get averageRoundScore => roundScores.isNotEmpty
+      ? roundScores.reduce((a, b) => a + b) / roundScores.length
+      : 0.0;
 }
