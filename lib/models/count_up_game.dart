@@ -1,10 +1,6 @@
 import 'dart_throw.dart';
 
-enum GameState {
-  waiting,
-  playing,
-  finished,
-}
+enum GameState { waiting, playing, finished }
 
 class CountUpGame {
   static const int maxRounds = 8;
@@ -107,13 +103,19 @@ class CountUpGame {
       'totalScore': _totalScore,
       'startTime': _startTime?.toIso8601String(),
       'endTime': _endTime?.toIso8601String(),
-      'rounds': _rounds.map((round) => 
-        round.map((dart) => {
-          'position': dart.position,
-          'score': dart.score,
-          'timestamp': dart.timestamp.toIso8601String(),
-        }).toList()
-      ).toList(),
+      'rounds': _rounds
+          .map(
+            (round) => round
+                .map(
+                  (dart) => {
+                    'position': dart.position,
+                    'score': dart.score,
+                    'timestamp': dart.timestamp.toIso8601String(),
+                  },
+                )
+                .toList(),
+          )
+          .toList(),
     };
   }
 }

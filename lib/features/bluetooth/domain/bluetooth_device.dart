@@ -12,28 +12,24 @@ class BluetoothDeviceInfo with _$BluetoothDeviceInfo {
     @Default(false) bool isConnected,
   }) = _BluetoothDeviceInfo;
 
-  factory BluetoothDeviceInfo.fromJson(Map<String, dynamic> json) => 
+  factory BluetoothDeviceInfo.fromJson(Map<String, dynamic> json) =>
       _$BluetoothDeviceInfoFromJson(json);
 }
 
-enum BluetoothConnectionState {
-  disconnected,
-  connecting,
-  connected,
-  error,
-}
+enum BluetoothConnectionState { disconnected, connecting, connected, error }
 
 @freezed
 class BluetoothState with _$BluetoothState {
   const factory BluetoothState({
-    @Default(BluetoothConnectionState.disconnected) BluetoothConnectionState connectionState,
+    @Default(BluetoothConnectionState.disconnected)
+    BluetoothConnectionState connectionState,
     @Default([]) List<BluetoothDeviceInfo> availableDevices,
     BluetoothDeviceInfo? connectedDevice,
     @Default([]) List<String> receivedData,
     String? errorMessage,
   }) = _BluetoothState;
 
-  factory BluetoothState.fromJson(Map<String, dynamic> json) => 
+  factory BluetoothState.fromJson(Map<String, dynamic> json) =>
       _$BluetoothStateFromJson(json);
 }
 

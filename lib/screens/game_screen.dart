@@ -5,10 +5,7 @@ import 'count_up_game_screen.dart';
 class GameScreen extends StatelessWidget {
   final BluetoothManager bluetoothManager;
 
-  const GameScreen({
-    super.key,
-    required this.bluetoothManager,
-  });
+  const GameScreen({super.key, required this.bluetoothManager});
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +131,9 @@ class GameScreen extends StatelessWidget {
               Icon(
                 icon,
                 size: 40,
-                color: onTap != null ? Theme.of(context).primaryColor : Colors.grey,
+                color: onTap != null
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -174,9 +173,8 @@ class GameScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CountUpGameScreen(
-          bluetoothManager: bluetoothManager,
-        ),
+        builder: (context) =>
+            CountUpGameScreen(bluetoothManager: bluetoothManager),
       ),
     );
   }

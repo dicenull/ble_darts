@@ -80,7 +80,8 @@ class BluetoothScreen extends ConsumerWidget {
             child: BluetoothDeviceListWidget(
               devices: bluetoothState.availableDevices,
               connectedDevice: bluetoothState.connectedDevice,
-              onDeviceConnect: (device) => bluetoothNotifier.connectToDevice(device),
+              onDeviceConnect: (device) =>
+                  bluetoothNotifier.connectToDevice(device),
               isWeb: UniversalPlatform.isWeb,
             ),
           ),
@@ -91,7 +92,7 @@ class BluetoothScreen extends ConsumerWidget {
               receivedData: bluetoothState.receivedData,
               onClear: () => bluetoothNotifier.clearData(),
             ),
-          
+
           // ゲームボタン
           Padding(
             padding: const EdgeInsets.all(16),
@@ -118,10 +119,7 @@ class BluetoothScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text(
                     '手動入力モードでゲームをプレイできます',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -141,9 +139,7 @@ class BluetoothScreen extends ConsumerWidget {
   void _navigateToGameScreen(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const GameScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const GameScreen()),
     );
   }
 }

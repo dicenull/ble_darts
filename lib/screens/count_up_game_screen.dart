@@ -8,10 +8,7 @@ import '../widgets/score_widgets.dart';
 class CountUpGameScreen extends StatefulWidget {
   final BluetoothManager bluetoothManager;
 
-  const CountUpGameScreen({
-    super.key,
-    required this.bluetoothManager,
-  });
+  const CountUpGameScreen({super.key, required this.bluetoothManager});
 
   @override
   State<CountUpGameScreen> createState() => _CountUpGameScreenState();
@@ -27,13 +24,13 @@ class _CountUpGameScreenState extends State<CountUpGameScreen> {
     super.initState();
     _gameService = GameService();
     _gameService.connectToBluetoothStream(widget.bluetoothManager.dataStream);
-    
+
     _gameSubscription = _gameService.gameStateStream.listen((game) {
       setState(() {
         _currentGame = game;
       });
     });
-    
+
     _currentGame = _gameService.currentGame;
   }
 
@@ -78,9 +75,9 @@ class _CountUpGameScreenState extends State<CountUpGameScreen> {
                         ),
                       ),
                     ),
-                  
+
                   ScoreDisplayWidget(game: _currentGame!),
-                  
+
                   if (_currentGame!.state == GameState.waiting)
                     _buildStartGameCard()
                   else if (_currentGame!.isGameActive) ...[
@@ -93,9 +90,8 @@ class _CountUpGameScreenState extends State<CountUpGameScreen> {
                     ),
                     RoundScoresWidget(game: _currentGame!),
                   ],
-                  
-                  if (_currentGame!.isGameActive)
-                    _buildDebugPanel(),
+
+                  if (_currentGame!.isGameActive) _buildDebugPanel(),
                 ],
               ),
             ),
@@ -117,23 +113,19 @@ class _CountUpGameScreenState extends State<CountUpGameScreen> {
             const SizedBox(height: 16),
             const Text(
               'カウントアップゲーム',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               '8ラウンド（各3投射）でできるだけ高いスコアを目指しましょう！',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: widget.bluetoothManager.isConnected ? _startNewGame : null,
+              onPressed: widget.bluetoothManager.isConnected
+                  ? _startNewGame
+                  : null,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 48),
               ),
@@ -144,10 +136,7 @@ class _CountUpGameScreenState extends State<CountUpGameScreen> {
                 padding: EdgeInsets.only(top: 8),
                 child: Text(
                   'Bluetooth接続が必要です',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.red, fontSize: 14),
                 ),
               ),
           ],
@@ -166,18 +155,12 @@ class _CountUpGameScreenState extends State<CountUpGameScreen> {
           children: [
             const Text(
               'テスト用（手動入力）',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
               'ダーツボードが接続されていない場合のテスト用機能です',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 16),
             Wrap(
@@ -203,9 +186,7 @@ class _CountUpGameScreenState extends State<CountUpGameScreen> {
   Widget _buildTestButton(String position, int score) {
     return ElevatedButton(
       onPressed: () => _gameService.addManualThrow(position),
-      style: ElevatedButton.styleFrom(
-        minimumSize: const Size(60, 36),
-      ),
+      style: ElevatedButton.styleFrom(minimumSize: const Size(60, 36)),
       child: Text(
         '$position\n$score',
         textAlign: TextAlign.center,

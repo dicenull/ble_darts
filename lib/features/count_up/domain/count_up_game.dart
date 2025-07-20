@@ -4,11 +4,7 @@ import '../../../shared/models/dart_throw.dart';
 part 'count_up_game.freezed.dart';
 part 'count_up_game.g.dart';
 
-enum GameState {
-  waiting,
-  playing,
-  finished,
-}
+enum GameState { waiting, playing, finished }
 
 @freezed
 class CountUpGame with _$CountUpGame {
@@ -22,7 +18,8 @@ class CountUpGame with _$CountUpGame {
     DateTime? endTime,
   }) = _CountUpGame;
 
-  factory CountUpGame.fromJson(Map<String, dynamic> json) => _$CountUpGameFromJson(json);
+  factory CountUpGame.fromJson(Map<String, dynamic> json) =>
+      _$CountUpGameFromJson(json);
 }
 
 extension CountUpGameX on CountUpGame {
@@ -32,7 +29,7 @@ extension CountUpGameX on CountUpGame {
   bool get isGameActive => state == GameState.playing;
   bool get isGameFinished => state == GameState.finished;
 
-  List<DartThrow> get currentRoundThrows => 
+  List<DartThrow> get currentRoundThrows =>
       rounds.length >= currentRound ? rounds[currentRound - 1] : [];
 
   List<int> get roundScores {
@@ -73,8 +70,11 @@ extension CountUpGameX on CountUpGame {
     if (updatedRounds.length < currentRound) {
       updatedRounds.add([]);
     }
-    
-    updatedRounds[currentRound - 1] = [...updatedRounds[currentRound - 1], dartThrow];
+
+    updatedRounds[currentRound - 1] = [
+      ...updatedRounds[currentRound - 1],
+      dartThrow,
+    ];
     final newTotalScore = totalScore + dartThrow.score;
 
     if (currentThrow < throwsPerRound) {

@@ -28,17 +28,21 @@ class GameScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     Icon(
-                      bluetoothState.connectionState == BluetoothConnectionState.connected
+                      bluetoothState.connectionState ==
+                              BluetoothConnectionState.connected
                           ? Icons.bluetooth_connected
                           : Icons.settings_input_antenna,
                       size: 48,
-                      color: bluetoothState.connectionState == BluetoothConnectionState.connected
+                      color:
+                          bluetoothState.connectionState ==
+                              BluetoothConnectionState.connected
                           ? Colors.green
                           : Colors.orange,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      bluetoothState.connectionState == BluetoothConnectionState.connected
+                      bluetoothState.connectionState ==
+                              BluetoothConnectionState.connected
                           ? 'Bluetooth接続済み'
                           : '手動入力モード',
                       style: const TextStyle(
@@ -48,7 +52,8 @@ class GameScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      bluetoothState.connectionState == BluetoothConnectionState.connected
+                      bluetoothState.connectionState ==
+                              BluetoothConnectionState.connected
                           ? 'ダーツボードと接続されています。ゲームを選択してください。'
                           : '手動でスコアを入力してゲームをプレイできます。',
                       textAlign: TextAlign.center,
@@ -112,7 +117,9 @@ class GameScreen extends ConsumerWidget {
               Icon(
                 icon,
                 size: 40,
-                color: onTap != null ? Theme.of(context).primaryColor : Colors.grey,
+                color: onTap != null
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -151,9 +158,7 @@ class GameScreen extends ConsumerWidget {
   void _startCountUpGame(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const CountUpGameScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const CountUpGameScreen()),
     );
   }
 }

@@ -11,7 +11,8 @@ class DartThrow with _$DartThrow {
     required DateTime timestamp,
   }) = _DartThrow;
 
-  factory DartThrow.fromJson(Map<String, dynamic> json) => _$DartThrowFromJson(json);
+  factory DartThrow.fromJson(Map<String, dynamic> json) =>
+      _$DartThrowFromJson(json);
 }
 
 extension DartThrowX on DartThrow {
@@ -30,12 +31,12 @@ extension DartThrowX on DartThrow {
 
     final regex = RegExp(r'([SDT])(\d+)');
     final match = regex.firstMatch(position);
-    
+
     if (match == null) return 0;
-    
+
     final multiplier = match.group(1);
     final number = int.parse(match.group(2)!);
-    
+
     switch (multiplier) {
       case 'S':
         return number;

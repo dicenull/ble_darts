@@ -24,12 +24,12 @@ class DartThrow {
 
     final regex = RegExp(r'([SDT])(\d+)');
     final match = regex.firstMatch(position);
-    
+
     if (match == null) return 0;
-    
+
     final multiplier = match.group(1);
     final number = int.parse(match.group(2)!);
-    
+
     switch (multiplier) {
       case 'S':
         return number;
