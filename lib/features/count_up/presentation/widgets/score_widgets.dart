@@ -10,7 +10,7 @@ class ScoreDisplayWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Stack(
@@ -72,7 +72,9 @@ class ScoreDisplayWidget extends StatelessWidget {
                           boxShadow: hasThrow
                               ? [
                                   BoxShadow(
-                                    color: colorScheme.primary.withValues(alpha: 0.3),
+                                    color: colorScheme.primary.withValues(
+                                      alpha: 0.3,
+                                    ),
                                     blurRadius: 8,
                                     spreadRadius: 1,
                                   ),
@@ -107,7 +109,6 @@ class ScoreDisplayWidget extends StatelessWidget {
               ],
             ),
           ),
-          // 総得点を中央上部に大きく表示
           Center(
             child: Padding(
               padding: const EdgeInsets.only(top: 20),
@@ -119,10 +120,7 @@ class ScoreDisplayWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: colorScheme.primary,
-                    width: 2,
-                  ),
+                  border: Border.all(color: colorScheme.primary, width: 2),
                   boxShadow: [
                     BoxShadow(
                       color: colorScheme.primary.withValues(alpha: 0.3),
@@ -147,7 +145,6 @@ class ScoreDisplayWidget extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class RoundScoresWidget extends StatelessWidget {
@@ -158,7 +155,7 @@ class RoundScoresWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(20),
@@ -269,9 +266,9 @@ class GameResultWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!game.isGameFinished) {
-      return const SizedBox.shrink();
-    }
+    // if (!game.isGameFinished) {
+    //   return const SizedBox.shrink();
+    // }
 
     final colorScheme = Theme.of(context).colorScheme;
     final duration = game.gameDuration;
@@ -283,10 +280,7 @@ class GameResultWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: colorScheme.primary,
-          width: 2,
-        ),
+        border: Border.all(color: colorScheme.primary, width: 2),
         boxShadow: [
           BoxShadow(
             color: colorScheme.primary.withValues(alpha: 0.2),
@@ -327,10 +321,7 @@ class GameResultWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: colorScheme.primary,
-                width: 2,
-              ),
+              border: Border.all(color: colorScheme.primary, width: 2),
               boxShadow: [
                 BoxShadow(
                   color: colorScheme.primary.withValues(alpha: 0.4),
@@ -366,23 +357,24 @@ class GameResultWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 32),
-          FilledButton(
-            onPressed: onNewGame,
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(double.infinity, 56),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
+          if (game.isGameFinished || game.state == GameState.waiting)
+            FilledButton(
+              onPressed: onNewGame,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(double.infinity, 56),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+              ),
+              child: const Text(
+                'NEW GAME',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1,
+                ),
               ),
             ),
-            child: const Text(
-              'NEW GAME',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1,
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -100,24 +100,12 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
                         const SizedBox(height: 8),
                       ],
 
-                      // ゲーム開始カード
-                      if (game.state == GameState.waiting)
-                        Expanded(
-                          child: _buildStartGameCard(
-                            context,
-                            gameNotifier,
-                            bluetoothState.connectionState,
-                          ),
-                        ),
-
                       // ゲーム終了結果
-                      if (game.isGameFinished) ...[
-                        GameResultWidget(
-                          game: game,
-                          onNewGame: () => gameNotifier.startGame(),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
+                      GameResultWidget(
+                        game: game,
+                        onNewGame: () => gameNotifier.startGame(),
+                      ),
+                      const SizedBox(height: 8),
                     ],
                   ),
                 ),
@@ -192,80 +180,6 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildStartGameCard(
-    BuildContext context,
-    CountUpGameNotifier gameNotifier,
-    BluetoothConnectionState connectionState,
-  ) {
-    final isConnected = connectionState == BluetoothConnectionState.connected;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outline),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (!isConnected) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colorScheme.error),
-              ),
-              child: Text(
-                'MANUAL MODE',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.onErrorContainer,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-          FilledButton(
-            onPressed: () => gameNotifier.startGame(),
-            style: FilledButton.styleFrom(
-              backgroundColor: isConnected
-                  ? colorScheme.primary
-                  : colorScheme.error,
-              foregroundColor: isConnected
-                  ? colorScheme.onPrimary
-                  : colorScheme.onError,
-              minimumSize: const Size(double.infinity, 48),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-            ),
-            child: const Text(
-              'START GAME',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
