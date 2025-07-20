@@ -14,21 +14,17 @@ import 'package:ble_darts/main.dart';
 void main() {
   testWidgets('BLE Dartsアプリのスモークテスト', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MyApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: MyApp()));
 
     // Wait for the app to initialize
     await tester.pumpAndSettle();
 
     // Verify that our app loads with the correct title.
     expect(find.text('BLE Darts (Mobile)'), findsOneWidget);
-    
+
     // Verify that bluetooth connection info is shown.
     expect(find.text('モバイル環境でのBluetooth接続'), findsOneWidget);
-    
+
     // Verify that device scan button is present.
     expect(find.byIcon(Icons.search), findsOneWidget);
   });
