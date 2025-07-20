@@ -3,38 +3,48 @@ name: Deploy Flutter Web to GitHub Pages
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  build-and-deploy:
+  build-web:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.32.6'
-        channel: 'stable'
+      - name: Clone repository
+        uses: actions/checkout@v4
         
-    - name: Get dependencies
-      run: flutter pub get
-      
-    - name: Generate code
-      run: flutter packages pub run build_runner build --delete-conflicting-outputs
-      
-    - name: Analyze code
-      run: flutter analyze
-      
-    - name: Build web
-      run: flutter build web --base-href /ble_darts/
-      
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/main'
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build/web
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Run tests
+        run: flutter test
+        
+      - name: Build web
+        run: flutter build web --base-href /ble_darts/
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './build/web'
+
+  deploy:
+    needs: build-web
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
