@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/count_up_provider.dart';
-import '../domain/count_up_game.dart';
+
 import '../../bluetooth/data/bluetooth_provider.dart';
 import '../../bluetooth/domain/bluetooth_device.dart';
-import 'widgets/score_widgets.dart';
+import '../data/count_up_provider.dart';
+import '../domain/count_up_game.dart';
 import 'widgets/dart_board_widget.dart';
+import 'widgets/score_widgets.dart';
 
 class CountUpGameScreen extends ConsumerStatefulWidget {
   const CountUpGameScreen({super.key});
