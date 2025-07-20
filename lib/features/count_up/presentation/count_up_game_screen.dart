@@ -45,95 +45,154 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            if (bluetoothState.connectionState !=
-                BluetoothConnectionState.connected)
-              Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.error,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                // 左列: ラウンド情報、ヒット情報、その他UI
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: [
+                      // Bluetooth接続状態
+                      if (bluetoothState.connectionState !=
+                          BluetoothConnectionState.connected)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.errorContainer,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.bluetooth_disabled,
+                                size: 16,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onErrorContainer,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'BT未接続',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // ラウンド・ヒット情報
+                      if (game.isGameActive || game.isGameFinished) ...[
+                        RoundScoresWidget(game: game),
+                        const SizedBox(height: 8),
+                      ],
+
+                      // ゲーム開始カード
+                      if (game.state == GameState.waiting)
+                        Expanded(
+                          child: _buildStartGameCard(
+                            context,
+                            gameNotifier,
+                            bluetoothState.connectionState,
+                          ),
+                        ),
+
+                      // ゲーム終了結果
+                      if (game.isGameFinished) ...[
+                        GameResultWidget(
+                          game: game,
+                          onNewGame: () => gameNotifier.startGame(),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+
+                      // マニュアル入力パネル
+                      if (game.isGameActive)
+                        Expanded(
+                          child: _buildManualInputPanel(
+                            gameNotifier,
+                            bluetoothState.connectionState ==
+                                BluetoothConnectionState.connected,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.bluetooth_disabled,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'BT未接続',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onErrorContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
 
-            ScoreDisplayWidget(game: game),
+                const SizedBox(width: 8),
 
-            if (game.isGameActive || game.isGameFinished)
-              Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
+                // 中央: ダーツボード
+                Expanded(
+                  flex: 4,
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: 1.0,
+                      child: (game.isGameActive || game.isGameFinished)
+                          ? Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainer,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.shadow.withValues(alpha: 0.3),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: DartBoardWidget(
+                                  highlightedPosition: _highlightedPosition,
+                                  onHighlightEnd: () {
+                                    setState(() {
+                                      _highlightedPosition = null;
+                                    });
+                                  },
+                                ),
+                              ),
+                            )
+                          : const SizedBox(),
+                    ),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.shadow.withValues(alpha: 0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
                 ),
-                child: DartBoardWidget(
-                  highlightedPosition: _highlightedPosition,
-                  onHighlightEnd: () {
-                    setState(() {
-                      _highlightedPosition = null;
-                    });
-                  },
+
+                const SizedBox(width: 8),
+
+                // 右列: 得点表示
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: [
+                      ScoreDisplayWidget(game: game),
+                      const Spacer(),
+                    ],
+                  ),
                 ),
-              ),
-
-            if (game.state == GameState.waiting)
-              _buildStartGameCard(
-                context,
-                gameNotifier,
-                bluetoothState.connectionState,
-              )
-            else if (game.isGameActive) ...[
-              RoundScoresWidget(game: game),
-            ] else if (game.isGameFinished) ...[
-              GameResultWidget(
-                game: game,
-                onNewGame: () => gameNotifier.startGame(),
-              ),
-              RoundScoresWidget(game: game),
-            ],
-
-            if (game.isGameActive)
-              _buildManualInputPanel(
-                gameNotifier,
-                bluetoothState.connectionState ==
-                    BluetoothConnectionState.connected,
-              ),
-          ],
-        ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -147,41 +206,42 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: colorScheme.outline),
         boxShadow: [
           BoxShadow(
             color: colorScheme.shadow.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (!isConnected) ...[
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: colorScheme.error),
               ),
               child: Text(
                 'MANUAL MODE',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   color: colorScheme.onErrorContainer,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1,
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
           ],
           FilledButton(
             onPressed: () => gameNotifier.startGame(),
@@ -192,15 +252,15 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
               foregroundColor: isConnected
                   ? colorScheme.onPrimary
                   : colorScheme.onError,
-              minimumSize: const Size(double.infinity, 56),
+              minimumSize: const Size(double.infinity, 48),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(24),
               ),
             ),
             child: const Text(
               'START GAME',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1,
               ),
@@ -218,17 +278,17 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: colorScheme.outline),
         boxShadow: [
           BoxShadow(
             color: colorScheme.shadow.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -236,12 +296,12 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isBluetoothConnected
                   ? colorScheme.surfaceContainerHigh
                   : colorScheme.errorContainer,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isBluetoothConnected
                     ? colorScheme.outline
@@ -253,16 +313,16 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
               children: [
                 Icon(
                   isBluetoothConnected ? Icons.tune : Icons.touch_app,
-                  size: 18,
+                  size: 14,
                   color: isBluetoothConnected
                       ? colorScheme.onSurface
                       : colorScheme.onErrorContainer,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 Text(
                   isBluetoothConnected ? 'TEST MODE' : 'MANUAL INPUT',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
                     color: isBluetoothConnected
                         ? colorScheme.onSurface
@@ -273,24 +333,28 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _buildScoreButton('S20', 20, gameNotifier),
-              _buildScoreButton('D20', 40, gameNotifier),
-              _buildScoreButton('T20', 60, gameNotifier),
-              _buildScoreButton('BULL', 50, gameNotifier),
-              _buildScoreButton('S1', 1, gameNotifier),
-              _buildScoreButton('S5', 5, gameNotifier),
-              _buildScoreButton('S10', 10, gameNotifier),
-              _buildScoreButton('S15', 15, gameNotifier),
-              _buildScoreButton('S19', 19, gameNotifier),
-              _buildScoreButton('D19', 38, gameNotifier),
-              _buildScoreButton('T19', 57, gameNotifier),
-              _buildScoreButton('MISS', 0, gameNotifier),
-            ],
+          const SizedBox(height: 12),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  _buildScoreButton('S20', 20, gameNotifier),
+                  _buildScoreButton('D20', 40, gameNotifier),
+                  _buildScoreButton('T20', 60, gameNotifier),
+                  _buildScoreButton('BULL', 50, gameNotifier),
+                  _buildScoreButton('S1', 1, gameNotifier),
+                  _buildScoreButton('S5', 5, gameNotifier),
+                  _buildScoreButton('S10', 10, gameNotifier),
+                  _buildScoreButton('S15', 15, gameNotifier),
+                  _buildScoreButton('S19', 19, gameNotifier),
+                  _buildScoreButton('D19', 38, gameNotifier),
+                  _buildScoreButton('T19', 57, gameNotifier),
+                  _buildScoreButton('MISS', 0, gameNotifier),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -324,17 +388,17 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
             : isBull
             ? colorScheme.onTertiary
             : colorScheme.onPrimary,
-        minimumSize: const Size(70, 50),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        minimumSize: const Size(50, 36),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: EdgeInsets.zero,
       ),
       child: Text(
         '$position\n$score',
         textAlign: TextAlign.center,
         style: const TextStyle(
-          fontSize: 10,
+          fontSize: 8,
           fontWeight: FontWeight.w900,
-          height: 1.2,
+          height: 1.1,
         ),
       ),
     );
