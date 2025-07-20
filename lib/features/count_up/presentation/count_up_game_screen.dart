@@ -171,6 +171,7 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
                   flex: 2,
                   child: Column(
                     children: [
+                      const Spacer(),
                       ScoreDisplayWidget(game: game),
                       const Spacer(),
                     ],

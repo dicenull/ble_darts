@@ -11,138 +11,119 @@ class ScoreDisplayWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Stack(
-        children: [
-          // ラウンドを左上に小さく表示
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: colorScheme.outline),
-                  ),
-                  child: Text(
-                    '${game.currentRound}/8',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-                // ラウンドの投射を下に表示
-                if (game.isGameActive) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    children: List.generate(3, (index) {
-                      final throwNumber = index + 1;
-                      final hasThrow = game.currentRoundThrows.length > index;
-                      final isCurrentThrow = throwNumber == game.currentThrow;
-
-                      return Container(
-                        margin: const EdgeInsets.only(right: 10),
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: hasThrow
-                              ? colorScheme.primaryContainer
-                              : isCurrentThrow
-                              ? colorScheme.surfaceContainerHigh
-                              : colorScheme.surfaceContainer,
-                          border: Border.all(
-                            color: hasThrow
-                                ? colorScheme.primary
-                                : isCurrentThrow
-                                ? colorScheme.primary
-                                : colorScheme.outline,
-                            width: 2,
-                          ),
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: hasThrow
-                              ? [
-                                  BoxShadow(
-                                    color: colorScheme.primary.withValues(
-                                      alpha: 0.3,
-                                    ),
-                                    blurRadius: 8,
-                                    spreadRadius: 1,
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: Center(
-                          child: hasThrow
-                              ? Text(
-                                  '${game.currentRoundThrows[index].score}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onPrimaryContainer,
-                                  ),
-                                )
-                              : Text(
-                                  '$throwNumber',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: isCurrentThrow
-                                        ? colorScheme.onSurface
-                                        : colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                        ),
-                      );
-                    }),
-                  ),
-                ],
-              ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: colorScheme.outline),
+          ),
+          child: Text(
+            '${game.currentRound}/8',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
             ),
           ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+        ),
+        // ラウンドの投射を下に表示
+        if (game.isGameActive) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: List.generate(3, (index) {
+              final throwNumber = index + 1;
+              final hasThrow = game.currentRoundThrows.length > index;
+              final isCurrentThrow = throwNumber == game.currentThrow;
+
+              return Container(
+                margin: const EdgeInsets.only(right: 10),
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: colorScheme.primary, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.primary.withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Text(
-                  game.totalScore.toString(),
-                  style: TextStyle(
-                    fontSize: 72,
-                    fontWeight: FontWeight.w900,
-                    color: colorScheme.onPrimaryContainer,
-                    letterSpacing: -2,
+                  color: hasThrow
+                      ? colorScheme.primaryContainer
+                      : isCurrentThrow
+                      ? colorScheme.surfaceContainerHigh
+                      : colorScheme.surfaceContainer,
+                  border: Border.all(
+                    color: hasThrow
+                        ? colorScheme.primary
+                        : isCurrentThrow
+                        ? colorScheme.primary
+                        : colorScheme.outline,
+                    width: 2,
                   ),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: hasThrow
+                      ? [
+                          BoxShadow(
+                            color: colorScheme.primary.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : null,
                 ),
+                child: Center(
+                  child: hasThrow
+                      ? Text(
+                          '${game.currentRoundThrows[index].score}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        )
+                      : Text(
+                          '$throwNumber',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isCurrentThrow
+                                ? colorScheme.onSurface
+                                : colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                ),
+              );
+            }),
+          ),
+        ],
+
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          width: 300,
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: colorScheme.primary, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.primary.withValues(alpha: 0.3),
+                blurRadius: 20,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              game.totalScore.toString(),
+              style: TextStyle(
+                fontSize: 72,
+                fontWeight: FontWeight.w900,
+                color: colorScheme.onPrimaryContainer,
+                letterSpacing: -2,
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
