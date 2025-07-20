@@ -15,7 +15,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'BLE Darts',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00FF88),
+          brightness: Brightness.dark,
+        ),
         useMaterial3: true,
       ),
       home: const BluetoothScreen(),
