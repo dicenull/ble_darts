@@ -49,7 +49,7 @@ class CountUpGameScreen extends ConsumerWidget {
             ScoreDisplayWidget(game: game),
             
             if (game.state == GameState.waiting)
-              _buildStartGameCard(context, gameNotifier, bluetoothState.connectionState == BluetoothConnectionState.connected)
+              _buildStartGameCard(context, gameNotifier, bluetoothState.connectionState)
             else if (game.isGameActive) ...[
               CurrentRoundWidget(game: game),
               RoundScoresWidget(game: game),
@@ -62,24 +62,26 @@ class CountUpGameScreen extends ConsumerWidget {
             ],
             
             if (game.isGameActive)
-              _buildDebugPanel(gameNotifier),
+              _buildManualInputPanel(gameNotifier, bluetoothState.connectionState == BluetoothConnectionState.connected),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStartGameCard(BuildContext context, CountUpGameNotifier gameNotifier, bool isBluetoothConnected) {
+  Widget _buildStartGameCard(BuildContext context, CountUpGameNotifier gameNotifier, BluetoothConnectionState connectionState) {
+    final isConnected = connectionState == BluetoothConnectionState.connected;
+    
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Icon(
+            Icon(
               Icons.play_circle_outline,
               size: 64,
-              color: Colors.green,
+              color: isConnected ? Colors.green : Colors.orange,
             ),
             const SizedBox(height: 16),
             const Text(
@@ -98,32 +100,35 @@ class CountUpGameScreen extends ConsumerWidget {
                 color: Colors.grey[600],
               ),
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: isBluetoothConnected ? () => gameNotifier.startGame() : null,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              child: const Text('ゲーム開始'),
-            ),
-            if (!isBluetoothConnected)
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Text(
-                  'Bluetooth接続が必要です',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 14,
-                  ),
+            if (!isConnected) ...[
+              const SizedBox(height: 8),
+              Text(
+                '手動入力モードでプレイします',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.orange[700],
+                  fontWeight: FontWeight.w500,
                 ),
               ),
+            ],
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => gameNotifier.startGame(),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+                backgroundColor: isConnected ? null : Colors.orange,
+                foregroundColor: isConnected ? null : Colors.white,
+              ),
+              child: Text(isConnected ? 'ゲーム開始' : '手動入力でゲーム開始'),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDebugPanel(CountUpGameNotifier gameNotifier) {
+  Widget _buildManualInputPanel(CountUpGameNotifier gameNotifier, bool isBluetoothConnected) {
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
@@ -131,19 +136,32 @@ class CountUpGameScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'テスト用（手動入力）',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Icon(
+                  isBluetoothConnected ? Icons.settings : Icons.touch_app,
+                  size: 20,
+                  color: isBluetoothConnected ? Colors.grey : Colors.orange,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  isBluetoothConnected ? 'テスト用（手動入力）' : '手動入力',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isBluetoothConnected ? null : Colors.orange[700],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              'ダーツボードが接続されていない場合のテスト用機能です',
+            Text(
+              isBluetoothConnected 
+                  ? 'ダーツボードが接続されていない場合のテスト用機能です'
+                  : 'スコアボタンをタップしてダーツの投射を記録してください',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey,
+                color: isBluetoothConnected ? Colors.grey : Colors.orange[600],
               ),
             ),
             const SizedBox(height: 16),
@@ -151,14 +169,18 @@ class CountUpGameScreen extends ConsumerWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildTestButton('S20', 20, gameNotifier),
-                _buildTestButton('D20', 40, gameNotifier),
-                _buildTestButton('T20', 60, gameNotifier),
-                _buildTestButton('BULL', 50, gameNotifier),
-                _buildTestButton('S1', 1, gameNotifier),
-                _buildTestButton('S5', 5, gameNotifier),
-                _buildTestButton('S10', 10, gameNotifier),
-                _buildTestButton('S15', 15, gameNotifier),
+                _buildScoreButton('S20', 20, gameNotifier),
+                _buildScoreButton('D20', 40, gameNotifier),
+                _buildScoreButton('T20', 60, gameNotifier),
+                _buildScoreButton('BULL', 50, gameNotifier),
+                _buildScoreButton('S1', 1, gameNotifier),
+                _buildScoreButton('S5', 5, gameNotifier),
+                _buildScoreButton('S10', 10, gameNotifier),
+                _buildScoreButton('S15', 15, gameNotifier),
+                _buildScoreButton('S19', 19, gameNotifier),
+                _buildScoreButton('D19', 38, gameNotifier),
+                _buildScoreButton('T19', 57, gameNotifier),
+                _buildScoreButton('MISS', 0, gameNotifier),
               ],
             ),
           ],
@@ -167,16 +189,18 @@ class CountUpGameScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTestButton(String position, int score, CountUpGameNotifier gameNotifier) {
+  Widget _buildScoreButton(String position, int score, CountUpGameNotifier gameNotifier) {
     return ElevatedButton(
       onPressed: () => gameNotifier.addManualThrow(position),
       style: ElevatedButton.styleFrom(
-        minimumSize: const Size(60, 36),
+        minimumSize: const Size(70, 40),
+        backgroundColor: position == 'MISS' ? Colors.red[50] : null,
+        foregroundColor: position == 'MISS' ? Colors.red[700] : null,
       ),
       child: Text(
         '$position\n$score',
         textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 10),
+        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
       ),
     );
   }

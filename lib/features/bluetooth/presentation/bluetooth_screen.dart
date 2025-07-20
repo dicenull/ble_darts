@@ -93,17 +93,41 @@ class BluetoothScreen extends ConsumerWidget {
             ),
           
           // ゲームボタン
-          if (bluetoothState.isConnected)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: ElevatedButton(
-                onPressed: () => _navigateToGameScreen(context),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                ),
-                child: const Text('ゲームを開始'),
-              ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                if (bluetoothState.isConnected)
+                  ElevatedButton(
+                    onPressed: () => _navigateToGameScreen(context),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                    child: const Text('ゲームを開始'),
+                  ),
+                if (!bluetoothState.isConnected) ...[
+                  ElevatedButton(
+                    onPressed: () => _navigateToGameScreen(context),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 48),
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Bluetooth接続をスキップしてゲームを開始'),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '手動入力モードでゲームをプレイできます',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ],
             ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(

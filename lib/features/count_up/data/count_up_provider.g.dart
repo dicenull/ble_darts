@@ -7,7 +7,7 @@ part of 'count_up_provider.dart';
 // **************************************************************************
 
 String _$countUpGameNotifierHash() =>
-    r'b06eb0434193b53edccc205f028f9afb1997b500';
+    r'35365ac300ad804134a58f4181db9886ab946b41';
 
 /// See also [CountUpGameNotifier].
 @ProviderFor(CountUpGameNotifier)
