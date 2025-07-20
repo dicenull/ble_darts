@@ -1,187 +1,194 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/count_up_provider.dart';
-import '../domain/count_up_game.dart';
+
 import '../../bluetooth/data/bluetooth_provider.dart';
 import '../../bluetooth/domain/bluetooth_device.dart';
+import '../data/count_up_provider.dart';
+import '../domain/count_up_game.dart';
+import 'widgets/dart_board_widget.dart';
 import 'widgets/score_widgets.dart';
 
-class CountUpGameScreen extends ConsumerWidget {
+class CountUpGameScreen extends ConsumerStatefulWidget {
   const CountUpGameScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CountUpGameScreen> createState() => _CountUpGameScreenState();
+}
+
+class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
+  String? _highlightedPosition;
+
+  @override
+  Widget build(BuildContext context) {
     final game = ref.watch(countUpGameNotifierProvider);
     final gameNotifier = ref.read(countUpGameNotifierProvider.notifier);
     final bluetoothState = ref.watch(bluetoothNotifierProvider);
 
+    ref.listen<CountUpGame>(countUpGameNotifierProvider, (previous, current) {
+      if (previous != null &&
+          current.currentRoundThrows.length >
+              previous.currentRoundThrows.length) {
+        final latestThrow = current.currentRoundThrows.last;
+        setState(() {
+          _highlightedPosition = latestThrow.position;
+        });
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('カウントアップ'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           if (game.isGameActive)
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () => _showResetDialog(context, gameNotifier),
-              tooltip: 'ゲームをリセット',
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            if (bluetoothState.connectionState != BluetoothConnectionState.connected)
-              const Card(
-                margin: EdgeInsets.all(16),
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Row(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                // 左列: ラウンド情報、ヒット情報、その他UI
+                Expanded(
+                  flex: 2,
+                  child: Column(
                     children: [
-                      Icon(Icons.warning, color: Colors.orange),
-                      SizedBox(width: 8),
-                      Text('Bluetooth接続が切断されました'),
+                      // Bluetooth接続状態
+                      if (bluetoothState.connectionState !=
+                          BluetoothConnectionState.connected)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.errorContainer,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.bluetooth_disabled,
+                                size: 16,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onErrorContainer,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'BT未接続',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // ラウンド・ヒット情報
+                      if (game.isGameActive || game.isGameFinished) ...[
+                        RoundScoresWidget(game: game),
+                        const SizedBox(height: 8),
+                      ],
+
+                      // ゲーム終了結果
+                      GameResultWidget(
+                        game: game,
+                        onNewGame: () => gameNotifier.startGame(),
+                      ),
+                      const SizedBox(height: 8),
                     ],
                   ),
                 ),
-              ),
-            
-            ScoreDisplayWidget(game: game),
-            
-            if (game.state == GameState.waiting)
-              _buildStartGameCard(context, gameNotifier, bluetoothState.connectionState == BluetoothConnectionState.connected)
-            else if (game.isGameActive) ...[
-              CurrentRoundWidget(game: game),
-              RoundScoresWidget(game: game),
-            ] else if (game.isGameFinished) ...[
-              GameResultWidget(
-                game: game,
-                onNewGame: () => gameNotifier.startGame(),
-              ),
-              RoundScoresWidget(game: game),
-            ],
-            
-            if (game.isGameActive)
-              _buildDebugPanel(gameNotifier),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildStartGameCard(BuildContext context, CountUpGameNotifier gameNotifier, bool isBluetoothConnected) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const Icon(
-              Icons.play_circle_outline,
-              size: 64,
-              color: Colors.green,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'カウントアップゲーム',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '8ラウンド（各3投射）でできるだけ高いスコアを目指しましょう！',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: isBluetoothConnected ? () => gameNotifier.startGame() : null,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              child: const Text('ゲーム開始'),
-            ),
-            if (!isBluetoothConnected)
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Text(
-                  'Bluetooth接続が必要です',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 14,
+                const SizedBox(width: 8),
+
+                // 中央: ダーツボード
+                Expanded(
+                  flex: 4,
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: 1.0,
+                      child: (game.isGameActive || game.isGameFinished)
+                          ? Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainer,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.shadow.withValues(alpha: 0.3),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: DartBoardWidget(
+                                  highlightedPosition: _highlightedPosition,
+                                  onHighlightEnd: () {
+                                    setState(() {
+                                      _highlightedPosition = null;
+                                    });
+                                  },
+                                  onPositionTapped: (position) {
+                                    print(
+                                      'Detected position: $position',
+                                    ); // デバッグ用
+                                    gameNotifier.addManualThrow(position);
+                                    setState(() {
+                                      _highlightedPosition = position;
+                                    });
+                                  },
+                                ),
+                              ),
+                            )
+                          : const SizedBox(),
+                    ),
                   ),
                 ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildDebugPanel(CountUpGameNotifier gameNotifier) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'テスト用（手動入力）',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'ダーツボードが接続されていない場合のテスト用機能です',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildTestButton('S20', 20, gameNotifier),
-                _buildTestButton('D20', 40, gameNotifier),
-                _buildTestButton('T20', 60, gameNotifier),
-                _buildTestButton('BULL', 50, gameNotifier),
-                _buildTestButton('S1', 1, gameNotifier),
-                _buildTestButton('S5', 5, gameNotifier),
-                _buildTestButton('S10', 10, gameNotifier),
-                _buildTestButton('S15', 15, gameNotifier),
+                const SizedBox(width: 8),
+
+                // 右列: 得点表示
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: [
+                      const Spacer(),
+                      ScoreDisplayWidget(game: game),
+                      const Spacer(),
+                    ],
+                  ),
+                ),
               ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildTestButton(String position, int score, CountUpGameNotifier gameNotifier) {
-    return ElevatedButton(
-      onPressed: () => gameNotifier.addManualThrow(position),
-      style: ElevatedButton.styleFrom(
-        minimumSize: const Size(60, 36),
-      ),
-      child: Text(
-        '$position\n$score',
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 10),
-      ),
-    );
-  }
-
-  void _showResetDialog(BuildContext context, CountUpGameNotifier gameNotifier) {
+  void _showResetDialog(
+    BuildContext context,
+    CountUpGameNotifier gameNotifier,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

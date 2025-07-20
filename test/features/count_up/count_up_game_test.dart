@@ -7,7 +7,7 @@ void main() {
     test('デフォルトのゲーム状態を作成できる', () {
       // Arrange & Act
       const game = CountUpGame();
-      
+
       // Assert
       expect(game.state, equals(GameState.waiting));
       expect(game.currentRound, equals(1));
@@ -21,10 +21,10 @@ void main() {
     test('ゲームを正しく開始できる', () {
       // Arrange
       const game = CountUpGame();
-      
+
       // Act
       final startedGame = game.startGame();
-      
+
       // Assert
       expect(startedGame.state, equals(GameState.playing));
       expect(startedGame.currentRound, equals(1));
@@ -42,10 +42,10 @@ void main() {
       const game = CountUpGame();
       final startedGame = game.startGame();
       final dartThrow = DartThrowX.fromDartsLiveData('S20');
-      
+
       // Act
       final gameWithThrow = startedGame.addThrow(dartThrow);
-      
+
       // Assert
       expect(gameWithThrow.totalScore, equals(20));
       expect(gameWithThrow.currentRound, equals(1));
@@ -58,13 +58,13 @@ void main() {
       // Arrange
       const game = CountUpGame();
       var currentGame = game.startGame();
-      
+
       // Act
       for (int i = 0; i < 3; i++) {
         final dartThrow = DartThrowX.fromDartsLiveData('S20');
         currentGame = currentGame.addThrow(dartThrow);
       }
-      
+
       // Assert
       expect(currentGame.currentRound, equals(2));
       expect(currentGame.currentThrow, equals(1));
@@ -76,7 +76,7 @@ void main() {
       // Arrange
       const game = CountUpGame();
       var currentGame = game.startGame();
-      
+
       // Act
       for (int round = 0; round < 8; round++) {
         for (int throwInRound = 0; throwInRound < 3; throwInRound++) {
@@ -84,7 +84,7 @@ void main() {
           currentGame = currentGame.addThrow(dartThrow);
         }
       }
-      
+
       // Assert
       expect(currentGame.state, equals(GameState.finished));
       expect(currentGame.isGameFinished, isTrue);
@@ -97,10 +97,10 @@ void main() {
       // Arrange
       const game = CountUpGame();
       final dartThrow = DartThrowX.fromDartsLiveData('S20');
-      
+
       // Act
       final gameWithThrow = game.addThrow(dartThrow);
-      
+
       // Assert
       expect(gameWithThrow.totalScore, equals(0));
       expect(gameWithThrow.currentRound, equals(1));
@@ -110,17 +110,17 @@ void main() {
     test('ラウンドスコアを正しく計算できる', () {
       const game = CountUpGame();
       var currentGame = game.startGame();
-      
+
       // Round 1: S20, S15, S10 = 45
       currentGame = currentGame.addThrow(DartThrowX.fromDartsLiveData('S20'));
       currentGame = currentGame.addThrow(DartThrowX.fromDartsLiveData('S15'));
       currentGame = currentGame.addThrow(DartThrowX.fromDartsLiveData('S10'));
-      
+
       // Round 2: T20, D20, S20 = 120
       currentGame = currentGame.addThrow(DartThrowX.fromDartsLiveData('T20'));
       currentGame = currentGame.addThrow(DartThrowX.fromDartsLiveData('D20'));
       currentGame = currentGame.addThrow(DartThrowX.fromDartsLiveData('S20'));
-      
+
       final roundScores = currentGame.roundScores;
       expect(roundScores.length, equals(8));
       expect(roundScores[0], equals(45));
@@ -131,17 +131,17 @@ void main() {
     test('平均スコアを正しく計算できる', () {
       const game = CountUpGame();
       var currentGame = game.startGame();
-      
+
       // Round 1: 60 points
       for (int i = 0; i < 3; i++) {
         currentGame = currentGame.addThrow(DartThrowX.fromDartsLiveData('S20'));
       }
-      
+
       // Round 2: 120 points
       for (int i = 0; i < 3; i++) {
         currentGame = currentGame.addThrow(DartThrowX.fromDartsLiveData('D20'));
       }
-      
+
       expect(currentGame.averageScore, equals(90.0)); // (60 + 120) / 2
     });
 
@@ -154,9 +154,9 @@ void main() {
       const game = CountUpGame();
       var startedGame = game.startGame();
       startedGame = startedGame.addThrow(DartThrowX.fromDartsLiveData('S20'));
-      
+
       final resetGame = startedGame.resetGame();
-      
+
       expect(resetGame.state, equals(GameState.waiting));
       expect(resetGame.currentRound, equals(1));
       expect(resetGame.currentThrow, equals(1));
@@ -169,7 +169,7 @@ void main() {
     test('ゲーム時間を正しく計算できる', () {
       const game = CountUpGame();
       final startedGame = game.startGame();
-      
+
       expect(startedGame.gameDuration, isNotNull);
       expect(startedGame.gameDuration!.inMilliseconds, greaterThanOrEqualTo(0));
     });
@@ -182,10 +182,10 @@ void main() {
     test('現在のラウンドのスローを正しく取得できる', () {
       const game = CountUpGame();
       var currentGame = game.startGame();
-      
+
       final dartThrow = DartThrowX.fromDartsLiveData('S20');
       currentGame = currentGame.addThrow(dartThrow);
-      
+
       final currentRoundThrows = currentGame.currentRoundThrows;
       expect(currentRoundThrows.length, equals(1));
       expect(currentRoundThrows[0].score, equals(20));
@@ -194,14 +194,16 @@ void main() {
     test('高スコアゲームを正しく処理できる', () {
       const game = CountUpGame();
       var currentGame = game.startGame();
-      
+
       // All triple 20s (perfect game)
       for (int round = 0; round < 8; round++) {
         for (int throwInRound = 0; throwInRound < 3; throwInRound++) {
-          currentGame = currentGame.addThrow(DartThrowX.fromDartsLiveData('T20'));
+          currentGame = currentGame.addThrow(
+            DartThrowX.fromDartsLiveData('T20'),
+          );
         }
       }
-      
+
       expect(currentGame.totalScore, equals(1440)); // 60 * 24
       expect(currentGame.averageScore, equals(180.0)); // 60 * 3 per round
       expect(currentGame.isGameFinished, isTrue);

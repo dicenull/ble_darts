@@ -19,11 +19,11 @@ class BluetoothNotifier extends _$BluetoothNotifier {
     try {
       _bluetoothManager = BluetoothManager();
       await _bluetoothManager!.initialize();
-      
+
       _bluetoothManager!.dataStream.listen((data) {
         _onDataReceived(data);
       });
-      
+
       state = state.copyWith(
         connectionState: BluetoothConnectionState.disconnected,
       );
@@ -66,14 +66,18 @@ class BluetoothNotifier extends _$BluetoothNotifier {
     if (_bluetoothManager == null) return;
 
     try {
-      state = state.copyWith(connectionState: BluetoothConnectionState.connecting);
-      
-      final device = _bluetoothManager!.availableDevices.firstWhere(
-        (device) => (UniversalPlatform.isWeb ? device.id : device.address) == deviceInfo.id,
+      state = state.copyWith(
+        connectionState: BluetoothConnectionState.connecting,
       );
-      
+
+      final device = _bluetoothManager!.availableDevices.firstWhere(
+        (device) =>
+            (UniversalPlatform.isWeb ? device.id : device.address) ==
+            deviceInfo.id,
+      );
+
       await _bluetoothManager!.connectToDevice(device);
-      
+
       state = state.copyWith(
         connectionState: BluetoothConnectionState.connected,
         connectedDevice: deviceInfo.copyWith(isConnected: true),
@@ -108,5 +112,6 @@ class BluetoothNotifier extends _$BluetoothNotifier {
     state = state.copyWith(receivedData: []);
   }
 
-  Stream<String> get dataStream => _bluetoothManager?.dataStream ?? const Stream.empty();
+  Stream<String> get dataStream =>
+      _bluetoothManager?.dataStream ?? const Stream.empty();
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universal_platform/universal_platform.dart';
+
+import '../../count_up/presentation/game_screen.dart';
 import '../data/bluetooth_provider.dart';
 import '../domain/bluetooth_device.dart';
 import 'widgets/bluetooth_widgets.dart';
-import '../../count_up/presentation/game_screen.dart';
 
 class BluetoothScreen extends ConsumerWidget {
   const BluetoothScreen({super.key});
@@ -65,9 +66,79 @@ class BluetoothScreen extends ConsumerWidget {
               ),
             ),
 
+          // デバイス検索ボタン
+          Padding(
+            padding: const EdgeInsets.all(32),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 80,
+                  child: ElevatedButton.icon(
+                    onPressed: () => bluetoothNotifier.scanDevices(),
+                    icon: const Icon(Icons.search, size: 32),
+                    label: Text(
+                      UniversalPlatform.isWeb ? 'デバイスを検索' : 'デバイスを再取得',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 4,
+                    ),
+                  ),
+                ),
+                if (!bluetoothState.isConnected) ...[
+                  SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => _navigateToGameScreen(context),
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('BTなしで開始'),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(80, 48),
+                      backgroundColor: Theme.of(context).colorScheme.tertiary,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
+                if (bluetoothState.isConnected) ...[
+                  const SizedBox(width: 16),
+                  SizedBox(
+                    height: 80,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _navigateToGameScreen(context),
+                      icon: const Icon(Icons.play_arrow, size: 32),
+                      label: const Text(
+                        'ゲームを開始',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 4,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
           // デバイス一覧タイトル
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               UniversalPlatform.isWeb ? '検索されたデバイス一覧' : 'ペアリング済みデバイス一覧',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -80,7 +151,8 @@ class BluetoothScreen extends ConsumerWidget {
             child: BluetoothDeviceListWidget(
               devices: bluetoothState.availableDevices,
               connectedDevice: bluetoothState.connectedDevice,
-              onDeviceConnect: (device) => bluetoothNotifier.connectToDevice(device),
+              onDeviceConnect: (device) =>
+                  bluetoothNotifier.connectToDevice(device),
               isWeb: UniversalPlatform.isWeb,
             ),
           ),
@@ -91,25 +163,7 @@ class BluetoothScreen extends ConsumerWidget {
               receivedData: bluetoothState.receivedData,
               onClear: () => bluetoothNotifier.clearData(),
             ),
-          
-          // ゲームボタン
-          if (bluetoothState.isConnected)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: ElevatedButton(
-                onPressed: () => _navigateToGameScreen(context),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                ),
-                child: const Text('ゲームを開始'),
-              ),
-            ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => bluetoothNotifier.scanDevices(),
-        tooltip: UniversalPlatform.isWeb ? 'デバイスを検索' : 'デバイスを再取得',
-        child: const Icon(Icons.search),
       ),
     );
   }
@@ -117,9 +171,7 @@ class BluetoothScreen extends ConsumerWidget {
   void _navigateToGameScreen(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const GameScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const GameScreen()),
     );
   }
 }
