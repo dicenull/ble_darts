@@ -118,16 +118,6 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
                         ),
                         const SizedBox(height: 8),
                       ],
-
-                      // マニュアル入力パネル
-                      if (game.isGameActive)
-                        Expanded(
-                          child: _buildManualInputPanel(
-                            gameNotifier,
-                            bluetoothState.connectionState ==
-                                BluetoothConnectionState.connected,
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -167,6 +157,15 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
                                   onHighlightEnd: () {
                                     setState(() {
                                       _highlightedPosition = null;
+                                    });
+                                  },
+                                  onPositionTapped: (position) {
+                                    print(
+                                      'Detected position: $position',
+                                    ); // デバッグ用
+                                    gameNotifier.addManualThrow(position);
+                                    setState(() {
+                                      _highlightedPosition = position;
                                     });
                                   },
                                 ),
@@ -267,139 +266,6 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildManualInputPanel(
-    CountUpGameNotifier gameNotifier,
-    bool isBluetoothConnected,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outline),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isBluetoothConnected
-                  ? colorScheme.surfaceContainerHigh
-                  : colorScheme.errorContainer,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isBluetoothConnected
-                    ? colorScheme.outline
-                    : colorScheme.error,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  isBluetoothConnected ? Icons.tune : Icons.touch_app,
-                  size: 14,
-                  color: isBluetoothConnected
-                      ? colorScheme.onSurface
-                      : colorScheme.onErrorContainer,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  isBluetoothConnected ? 'TEST MODE' : 'MANUAL INPUT',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: isBluetoothConnected
-                        ? colorScheme.onSurface
-                        : colorScheme.onErrorContainer,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  _buildScoreButton('S20', 20, gameNotifier),
-                  _buildScoreButton('D20', 40, gameNotifier),
-                  _buildScoreButton('T20', 60, gameNotifier),
-                  _buildScoreButton('BULL', 50, gameNotifier),
-                  _buildScoreButton('S1', 1, gameNotifier),
-                  _buildScoreButton('S5', 5, gameNotifier),
-                  _buildScoreButton('S10', 10, gameNotifier),
-                  _buildScoreButton('S15', 15, gameNotifier),
-                  _buildScoreButton('S19', 19, gameNotifier),
-                  _buildScoreButton('D19', 38, gameNotifier),
-                  _buildScoreButton('T19', 57, gameNotifier),
-                  _buildScoreButton('MISS', 0, gameNotifier),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScoreButton(
-    String position,
-    int score,
-    CountUpGameNotifier gameNotifier,
-  ) {
-    final isMiss = position == 'MISS';
-    final isBull = position == 'BULL';
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return FilledButton(
-      onPressed: () {
-        gameNotifier.addManualThrow(position);
-        setState(() {
-          _highlightedPosition = position;
-        });
-      },
-      style: FilledButton.styleFrom(
-        backgroundColor: isMiss
-            ? colorScheme.error
-            : isBull
-            ? colorScheme.tertiary
-            : colorScheme.primary,
-        foregroundColor: isMiss
-            ? colorScheme.onError
-            : isBull
-            ? colorScheme.onTertiary
-            : colorScheme.onPrimary,
-        minimumSize: const Size(50, 36),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: EdgeInsets.zero,
-      ),
-      child: Text(
-        '$position\n$score',
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 8,
-          fontWeight: FontWeight.w900,
-          height: 1.1,
-        ),
       ),
     );
   }

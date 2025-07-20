@@ -6,12 +6,14 @@ class DartBoardWidget extends StatefulWidget {
   final String? highlightedPosition;
   final Duration highlightDuration;
   final VoidCallback? onHighlightEnd;
+  final Function(String position)? onPositionTapped;
 
   const DartBoardWidget({
     super.key,
     this.highlightedPosition,
     this.highlightDuration = const Duration(milliseconds: 1500),
     this.onHighlightEnd,
+    this.onPositionTapped,
   });
 
   @override
@@ -60,22 +62,93 @@ class _DartBoardWidgetState extends State<DartBoardWidget>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 300,
-      height: 300,
-      child: AnimatedBuilder(
-        animation: _highlightAnimation,
-        builder: (context, child) {
-          return CustomPaint(
-            painter: DartBoardPainter(
-              highlightedPosition: widget.highlightedPosition,
-              highlightIntensity: _highlightAnimation.value,
-            ),
-            size: const Size(300, 300),
-          );
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        return AnimatedBuilder(
+          animation: _highlightAnimation,
+          builder: (context, child) {
+            return GestureDetector(
+              onTapDown: (details) {
+                if (widget.onPositionTapped != null) {
+                  final position = _getPositionFromOffset(
+                    details.localPosition,
+                    size,
+                  );
+                  if (position != null) {
+                    widget.onPositionTapped!(position);
+                  }
+                }
+              },
+              child: CustomPaint(
+                painter: DartBoardPainter(
+                  highlightedPosition: widget.highlightedPosition,
+                  highlightIntensity: _highlightAnimation.value,
+                ),
+                size: size,
+              ),
+            );
+          },
+        );
+      },
     );
+  }
+
+  String? _getPositionFromOffset(Offset offset, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2;
+
+    // タップ位置から中心までの距離と角度を計算
+    final dx = offset.dx - center.dx;
+    final dy = offset.dy - center.dy;
+    final distance = math.sqrt(dx * dx + dy * dy);
+    final angle = math.atan2(dy, dx);
+
+    // 正規化された距離（0.0 - 1.0）
+    final normalizedDistance = distance / radius;
+
+    // 範囲外の場合は無視
+    if (normalizedDistance > DartBoardPainter.outerDoubleRadius + 0.05) {
+      return null;
+    }
+
+    // ブル領域かどうかチェック
+    if (normalizedDistance <= DartBoardPainter.innerBullRadius) {
+      return 'BULL';
+    } else if (normalizedDistance <= DartBoardPainter.outerBullRadius) {
+      return 'D-BULL';
+    }
+
+    // 角度を正規化 (ダーツボードは上方向が20、時計回り)
+    double normalizedAngle = angle + math.pi / 2; // 上方向を0にする
+    if (normalizedAngle < 0) normalizedAngle += 2 * math.pi;
+    if (normalizedAngle >= 2 * math.pi) normalizedAngle -= 2 * math.pi;
+
+    // セクションインデックスを計算
+    final segmentAngle = 2 * math.pi / 20;
+    final segmentIndex = (normalizedAngle / segmentAngle).round() % 20;
+    final number = DartBoardPainter.numbers[segmentIndex];
+
+    // 領域を判定（外側から内側へ）
+    String prefix;
+    if (normalizedDistance > DartBoardPainter.innerDoubleRadius &&
+        normalizedDistance <= DartBoardPainter.outerDoubleRadius) {
+      prefix = 'D';
+    } else if (normalizedDistance > DartBoardPainter.innerSingleRadius &&
+        normalizedDistance <= DartBoardPainter.innerDoubleRadius) {
+      prefix = 'S';
+    } else if (normalizedDistance > DartBoardPainter.innerTripleRadius &&
+        normalizedDistance <= DartBoardPainter.outerTripleRadius) {
+      prefix = 'T';
+    } else if (normalizedDistance > DartBoardPainter.outerBullRadius &&
+        normalizedDistance <= DartBoardPainter.innerTripleRadius) {
+      prefix = 'S';
+    } else {
+      // ワイヤー部分や判定できない領域
+      return null;
+    }
+
+    return '$prefix$number';
   }
 }
 
