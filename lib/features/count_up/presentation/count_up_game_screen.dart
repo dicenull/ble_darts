@@ -5,15 +5,34 @@ import '../domain/count_up_game.dart';
 import '../../bluetooth/data/bluetooth_provider.dart';
 import '../../bluetooth/domain/bluetooth_device.dart';
 import 'widgets/score_widgets.dart';
+import 'widgets/dart_board_widget.dart';
 
-class CountUpGameScreen extends ConsumerWidget {
+class CountUpGameScreen extends ConsumerStatefulWidget {
   const CountUpGameScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CountUpGameScreen> createState() => _CountUpGameScreenState();
+}
+
+class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
+  String? _highlightedPosition;
+
+  @override
+  Widget build(BuildContext context) {
     final game = ref.watch(countUpGameNotifierProvider);
     final gameNotifier = ref.read(countUpGameNotifierProvider.notifier);
     final bluetoothState = ref.watch(bluetoothNotifierProvider);
+
+    ref.listen<CountUpGame>(countUpGameNotifierProvider, (previous, current) {
+      if (previous != null &&
+          current.currentRoundThrows.length >
+              previous.currentRoundThrows.length) {
+        final latestThrow = current.currentRoundThrows.last;
+        setState(() {
+          _highlightedPosition = latestThrow.position;
+        });
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -31,7 +50,8 @@ class CountUpGameScreen extends ConsumerWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            if (bluetoothState.connectionState != BluetoothConnectionState.connected)
+            if (bluetoothState.connectionState !=
+                BluetoothConnectionState.connected)
               const Card(
                 margin: EdgeInsets.all(16),
                 child: Padding(
@@ -45,11 +65,43 @@ class CountUpGameScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-            
+
             ScoreDisplayWidget(game: game),
-            
+
+            if (game.isGameActive || game.isGameFinished)
+              Card(
+                margin: const EdgeInsets.all(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'ダーツ盤',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      DartBoardWidget(
+                        highlightedPosition: _highlightedPosition,
+                        onHighlightEnd: () {
+                          setState(() {
+                            _highlightedPosition = null;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
             if (game.state == GameState.waiting)
-              _buildStartGameCard(context, gameNotifier, bluetoothState.connectionState)
+              _buildStartGameCard(
+                context,
+                gameNotifier,
+                bluetoothState.connectionState,
+              )
             else if (game.isGameActive) ...[
               CurrentRoundWidget(game: game),
               RoundScoresWidget(game: game),
@@ -60,18 +112,26 @@ class CountUpGameScreen extends ConsumerWidget {
               ),
               RoundScoresWidget(game: game),
             ],
-            
+
             if (game.isGameActive)
-              _buildManualInputPanel(gameNotifier, bluetoothState.connectionState == BluetoothConnectionState.connected),
+              _buildManualInputPanel(
+                gameNotifier,
+                bluetoothState.connectionState ==
+                    BluetoothConnectionState.connected,
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStartGameCard(BuildContext context, CountUpGameNotifier gameNotifier, BluetoothConnectionState connectionState) {
+  Widget _buildStartGameCard(
+    BuildContext context,
+    CountUpGameNotifier gameNotifier,
+    BluetoothConnectionState connectionState,
+  ) {
     final isConnected = connectionState == BluetoothConnectionState.connected;
-    
+
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
@@ -86,19 +146,13 @@ class CountUpGameScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             const Text(
               'カウントアップゲーム',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               '8ラウンド（各3投射）でできるだけ高いスコアを目指しましょう！',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             if (!isConnected) ...[
               const SizedBox(height: 8),
@@ -128,7 +182,10 @@ class CountUpGameScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildManualInputPanel(CountUpGameNotifier gameNotifier, bool isBluetoothConnected) {
+  Widget _buildManualInputPanel(
+    CountUpGameNotifier gameNotifier,
+    bool isBluetoothConnected,
+  ) {
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
@@ -156,7 +213,7 @@ class CountUpGameScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              isBluetoothConnected 
+              isBluetoothConnected
                   ? 'ダーツボードが接続されていない場合のテスト用機能です'
                   : 'スコアボタンをタップしてダーツの投射を記録してください',
               style: TextStyle(
@@ -189,9 +246,18 @@ class CountUpGameScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildScoreButton(String position, int score, CountUpGameNotifier gameNotifier) {
+  Widget _buildScoreButton(
+    String position,
+    int score,
+    CountUpGameNotifier gameNotifier,
+  ) {
     return ElevatedButton(
-      onPressed: () => gameNotifier.addManualThrow(position),
+      onPressed: () {
+        gameNotifier.addManualThrow(position);
+        setState(() {
+          _highlightedPosition = position;
+        });
+      },
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(70, 40),
         backgroundColor: position == 'MISS' ? Colors.red[50] : null,
@@ -205,7 +271,10 @@ class CountUpGameScreen extends ConsumerWidget {
     );
   }
 
-  void _showResetDialog(BuildContext context, CountUpGameNotifier gameNotifier) {
+  void _showResetDialog(
+    BuildContext context,
+    CountUpGameNotifier gameNotifier,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
