@@ -1,3 +1,5 @@
+import 'package:ble_darts/models/count_up_game.dart';
+import 'package:ble_darts/shared/models/dart_throw.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,21 +23,38 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
   @override
   Widget build(BuildContext context) {
     final game = ref.watch(multiplayerCountUpGameNotifierProvider);
-    final gameNotifier = ref.read(multiplayerCountUpGameNotifierProvider.notifier);
+    final gameNotifier = ref.read(
+      multiplayerCountUpGameNotifierProvider.notifier,
+    );
     final bluetoothState = ref.watch(bluetoothNotifierProvider);
 
-    ref.listen<MultiplayerCountUpGame>(multiplayerCountUpGameNotifierProvider, (previous, current) {
+    ref.listen<MultiplayerCountUpGame>(multiplayerCountUpGameNotifierProvider, (
+      previous,
+      current,
+    ) {
       if (previous != null && current.currentPlayer != null) {
         final previousPlayerGame = previous.currentPlayer?.game;
-        
+
         if (previousPlayerGame != null &&
             current.currentPlayer!.game.rounds.isNotEmpty &&
-            current.currentPlayer!.game.rounds[current.currentPlayer!.game.currentRound - 1].length >
+            current
+                    .currentPlayer!
+                    .game
+                    .rounds[current.currentPlayer!.game.currentRound - 1]
+                    .length >
                 (previous.currentPlayer?.game.rounds.isNotEmpty == true &&
-                 previous.currentPlayer!.game.rounds.length >= previous.currentPlayer!.game.currentRound
-                    ? previous.currentPlayer!.game.rounds[previous.currentPlayer!.game.currentRound - 1].length
+                        previous.currentPlayer!.game.rounds.length >=
+                            previous.currentPlayer!.game.currentRound
+                    ? previous
+                          .currentPlayer!
+                          .game
+                          .rounds[previous.currentPlayer!.game.currentRound - 1]
+                          .length
                     : 0)) {
-          final currentRoundThrows = current.currentPlayer!.game.rounds[current.currentPlayer!.game.currentRound - 1];
+          final currentRoundThrows = current
+              .currentPlayer!
+              .game
+              .rounds[current.currentPlayer!.game.currentRound - 1];
           final latestThrow = currentRoundThrows.last;
           setState(() {
             _highlightedPosition = latestThrow.position;
@@ -60,7 +79,8 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
         child: Column(
           children: [
             // Bluetooth接続状態
-            if (bluetoothState.connectionState != BluetoothConnectionState.connected)
+            if (bluetoothState.connectionState !=
+                BluetoothConnectionState.connected)
               Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.all(8),
@@ -91,7 +111,7 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
                   ],
                 ),
               ),
-            
+
             Expanded(
               child: Row(
                 children: [
@@ -104,35 +124,48 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
                         if (game.currentPlayer != null)
                           CurrentPlayerWidget(playerData: game.currentPlayer!),
                         const SizedBox(height: 8),
-                        
+
+                        // 今のラウンドのスロー
+                        if (game.currentPlayer != null &&
+                            game.currentPlayer!.game.rounds.isNotEmpty)
+                          _RoundThrows(
+                            throws:
+                                game.currentPlayer!.game.rounds[game
+                                        .currentPlayer!
+                                        .game
+                                        .currentRound -
+                                    1],
+                          ),
+
                         // プレイヤーリストとスコア（1人の場合は簡素化）
                         Expanded(
-                          child: game.players.length == 1 
+                          child: game.players.length == 1
                               ? _buildSinglePlayerScore(game)
                               : MultiplayerScoreWidget(game: game),
                         ),
-                        
+
                         const SizedBox(height: 8),
-                        
+
                         // ゲーム終了時の結果
                         if (game.isGameFinished)
                           MultiplayerResultWidget(
                             game: game,
                             onNewGame: () => gameNotifier.resetGame(),
                           ),
-                        
+
                         // リセットボタン
                         if (game.isGameActive)
                           ElevatedButton(
-                            onPressed: () => _showResetDialog(context, gameNotifier),
+                            onPressed: () =>
+                                _showResetDialog(context, gameNotifier),
                             child: const Text('RESET'),
                           ),
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(width: 8),
-                  
+
                   // 中央: ダーツボード
                   Expanded(
                     flex: 4,
@@ -141,14 +174,18 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
                         aspectRatio: 1.0,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainer,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: Theme.of(context).colorScheme.outline,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.3),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.shadow.withValues(alpha: 0.3),
                                 blurRadius: 15,
                                 offset: const Offset(0, 5),
                               ),
@@ -175,9 +212,9 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 8),
-                  
+
                   // 右列: 統計情報
                   Expanded(
                     flex: 2,
@@ -195,7 +232,7 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
   // 1人プレイ用の簡素化されたスコア表示
   Widget _buildSinglePlayerScore(MultiplayerCountUpGame game) {
     final player = game.players.first;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -203,16 +240,16 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
           children: [
             Text(
               player.player.name,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Text(
               '${player.game.totalScore}',
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -248,6 +285,40 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _RoundThrows extends StatelessWidget {
+  final List<DartThrow> throws;
+
+  const _RoundThrows({required this.throws});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        ...List.generate(CountUpGame.throwsPerRound, (index) {
+          final dartThrow = index < throws.length
+              ? throws[index].position
+              : '-';
+          return Chip(
+            label: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 48),
+              child: Text(
+                dartThrow,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          );
+        }),
+      ],
     );
   }
 }
