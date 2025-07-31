@@ -25,7 +25,7 @@ class ScoreDisplayWidget extends StatelessWidget {
           child: Text(
             '${game.currentRound}/8',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 32,
               fontWeight: FontWeight.bold,
               color: colorScheme.onSurface,
             ),
@@ -74,7 +74,7 @@ class ScoreDisplayWidget extends StatelessWidget {
                       ? Text(
                           '${game.currentRoundThrows[index].score}',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: colorScheme.onPrimaryContainer,
                           ),
@@ -82,7 +82,7 @@ class ScoreDisplayWidget extends StatelessWidget {
                       : Text(
                           '$throwNumber',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color: isCurrentThrow
                                 ? colorScheme.onSurface
@@ -115,7 +115,7 @@ class ScoreDisplayWidget extends StatelessWidget {
             child: Text(
               game.totalScore.toString(),
               style: TextStyle(
-                fontSize: 72,
+                fontSize: 96,
                 fontWeight: FontWeight.w900,
                 color: colorScheme.onPrimaryContainer,
                 letterSpacing: -2,
@@ -202,22 +202,9 @@ class RoundScoresWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '$roundNumber',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: isCurrentRound
-                        ? colorScheme.onPrimaryContainer
-                        : isCompleted
-                        ? colorScheme.onSecondaryContainer
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
                   isCompleted ? '$roundScore' : '-',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 24,
                     fontWeight: FontWeight.w900,
                     color: isCurrentRound
                         ? colorScheme.onPrimaryContainer
@@ -314,7 +301,7 @@ class GameResultWidget extends StatelessWidget {
             child: Text(
               '${game.totalScore}',
               style: TextStyle(
-                fontSize: 56,
+                fontSize: 80,
                 fontWeight: FontWeight.w900,
                 color: colorScheme.onPrimaryContainer,
                 letterSpacing: -2,
@@ -387,7 +374,7 @@ class GameResultWidget extends StatelessWidget {
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 28,
                   fontWeight: FontWeight.w900,
                   color: colorScheme.primary,
                 ),

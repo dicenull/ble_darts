@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:ble_darts/shared/models/dart_board_model.dart';
 import 'package:flutter/material.dart';
 
 class DartBoardWidget extends StatefulWidget {
@@ -95,60 +96,7 @@ class _DartBoardWidgetState extends State<DartBoardWidget>
   }
 
   String? _getPositionFromOffset(Offset offset, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = math.min(size.width, size.height) / 2;
-
-    // タップ位置から中心までの距離と角度を計算
-    final dx = offset.dx - center.dx;
-    final dy = offset.dy - center.dy;
-    final distance = math.sqrt(dx * dx + dy * dy);
-    final angle = math.atan2(dy, dx);
-
-    // 正規化された距離（0.0 - 1.0）
-    final normalizedDistance = distance / radius;
-
-    // 範囲外の場合は無視
-    if (normalizedDistance > DartBoardPainter.outerDoubleRadius + 0.05) {
-      return null;
-    }
-
-    // ブル領域かどうかチェック
-    if (normalizedDistance <= DartBoardPainter.innerBullRadius) {
-      return 'BULL';
-    } else if (normalizedDistance <= DartBoardPainter.outerBullRadius) {
-      return 'D-BULL';
-    }
-
-    // 角度を正規化 (ダーツボードは上方向が20、時計回り)
-    double normalizedAngle = angle + math.pi / 2; // 上方向を0にする
-    if (normalizedAngle < 0) normalizedAngle += 2 * math.pi;
-    if (normalizedAngle >= 2 * math.pi) normalizedAngle -= 2 * math.pi;
-
-    // セクションインデックスを計算
-    final segmentAngle = 2 * math.pi / 20;
-    final segmentIndex = (normalizedAngle / segmentAngle).round() % 20;
-    final number = DartBoardPainter.numbers[segmentIndex];
-
-    // 領域を判定（外側から内側へ）
-    String prefix;
-    if (normalizedDistance > DartBoardPainter.innerDoubleRadius &&
-        normalizedDistance <= DartBoardPainter.outerDoubleRadius) {
-      prefix = 'D';
-    } else if (normalizedDistance > DartBoardPainter.innerSingleRadius &&
-        normalizedDistance <= DartBoardPainter.innerDoubleRadius) {
-      prefix = 'S';
-    } else if (normalizedDistance > DartBoardPainter.innerTripleRadius &&
-        normalizedDistance <= DartBoardPainter.outerTripleRadius) {
-      prefix = 'T';
-    } else if (normalizedDistance > DartBoardPainter.outerBullRadius &&
-        normalizedDistance <= DartBoardPainter.innerTripleRadius) {
-      prefix = 'S';
-    } else {
-      // ワイヤー部分や判定できない領域
-      return null;
-    }
-
-    return '$prefix$number';
+    return DartBoardPosition.calculateFromOffset(offset, size);
   }
 }
 
@@ -158,44 +106,9 @@ class DartBoardPainter extends CustomPainter {
 
   DartBoardPainter({this.highlightedPosition, this.highlightIntensity = 0.0});
 
-  static const List<int> numbers = [
-    20,
-    1,
-    18,
-    4,
-    13,
-    6,
-    10,
-    15,
-    2,
-    17,
-    3,
-    19,
-    7,
-    16,
-    8,
-    11,
-    14,
-    9,
-    12,
-    5,
-  ];
-
   // レイアウト定数
   static const double anglePerSegment = 2 * math.pi / 20;
   static const double padding = math.pi / 20;
-
-  // 半径比率
-  static const double outerDoubleRadius = .75;
-  static const double innerDoubleRadius = .70;
-  static const double outerSingleRadius = .70;
-  static const double innerSingleRadius = .38;
-  static const double outerTripleRadius = .38;
-  static const double innerTripleRadius = .33;
-  static const double innerInnerSingleRadius = .33;
-  static const double outerBullRadius = .11;
-  static const double innerBullRadius = .044;
-  static const double innerRadius = 0.044;
 
   // テキスト位置
   static const double numberRadius = 0.88;
@@ -235,7 +148,7 @@ class DartBoardPainter extends CustomPainter {
 
   void _drawNumberSegments(Canvas canvas, Offset center, double radius) {
     for (int i = 0; i < 20; i++) {
-      final number = numbers[i];
+      final number = DartBoardConstants.numbers[i];
       final startAngle = -math.pi / 2 + i * anglePerSegment - padding;
       final endAngle = startAngle + anglePerSegment;
 
@@ -258,7 +171,7 @@ class DartBoardPainter extends CustomPainter {
   bool _isPositionHighlighted(int number) {
     if (highlightedPosition == null) return false;
 
-    if (highlightedPosition == 'BULL' || highlightedPosition == 'D-BULL') {
+    if (highlightedPosition == 'D-BULL' || highlightedPosition == 'S-BULL') {
       return false;
     }
 
@@ -274,7 +187,7 @@ class DartBoardPainter extends CustomPainter {
   String? _getHighlightedType() {
     if (highlightedPosition == null) return null;
 
-    if (highlightedPosition == 'BULL' || highlightedPosition == 'D-BULL') {
+    if (highlightedPosition == 'D-BULL' || highlightedPosition == 'S-BULL') {
       return highlightedPosition;
     }
 
@@ -301,8 +214,8 @@ class DartBoardPainter extends CustomPainter {
     _drawSegmentSection(
       canvas,
       center,
-      radius * innerDoubleRadius,
-      radius * outerDoubleRadius,
+      radius * DartBoardConstants.innerDoubleRadius,
+      radius * DartBoardConstants.outerDoubleRadius,
       startAngle,
       endAngle,
       colors.double,
@@ -313,8 +226,8 @@ class DartBoardPainter extends CustomPainter {
     _drawSegmentSection(
       canvas,
       center,
-      radius * innerSingleRadius,
-      radius * outerSingleRadius,
+      radius * DartBoardConstants.innerSingleRadius,
+      radius * DartBoardConstants.outerSingleRadius,
       startAngle,
       endAngle,
       colors.single,
@@ -325,8 +238,8 @@ class DartBoardPainter extends CustomPainter {
     _drawSegmentSection(
       canvas,
       center,
-      radius * innerTripleRadius,
-      radius * outerTripleRadius,
+      radius * DartBoardConstants.innerTripleRadius,
+      radius * DartBoardConstants.outerTripleRadius,
       startAngle,
       endAngle,
       colors.triple,
@@ -337,8 +250,8 @@ class DartBoardPainter extends CustomPainter {
     _drawSegmentSection(
       canvas,
       center,
-      radius * outerBullRadius,
-      radius * innerInnerSingleRadius,
+      radius * DartBoardConstants.outerBullRadius,
+      radius * DartBoardConstants.innerInnerSingleRadius,
       startAngle,
       endAngle,
       colors.single,
@@ -347,12 +260,12 @@ class DartBoardPainter extends CustomPainter {
   }
 
   ({Color single, Color double, Color triple}) _getSegmentColors(int index) {
-    final isBlack = index % 2 == 1;
+    final isBlack = index % 2 == 0;
 
     if (isBlack) {
-      return (single: blackSegment, double: blueSegment, triple: blueSegment);
+      return (single: blackSegment, double: redSegment, triple: redSegment);
     } else {
-      return (single: whiteSegment, double: redSegment, triple: redSegment);
+      return (single: whiteSegment, double: blueSegment, triple: blueSegment);
     }
   }
 
@@ -413,15 +326,15 @@ class DartBoardPainter extends CustomPainter {
   }
 
   void _drawBullsEye(Canvas canvas, Offset center, double radius) {
-    final outerBullHighlight = highlightedPosition == 'D-BULL'
+    final outerBullHighlight = highlightedPosition == 'S-BULL'
         ? highlightIntensity
         : 0.0;
-    final innerBullHighlight = highlightedPosition == 'BULL'
+    final innerBullHighlight = highlightedPosition == 'D-BULL'
         ? highlightIntensity
         : 0.0;
 
-    Color outerBullColor = blueSegment;
-    Color innerBullColor = redSegment;
+    Color outerBullColor = redSegment;
+    Color innerBullColor = blackSegment;
 
     if (outerBullHighlight > 0) {
       outerBullColor =
@@ -450,8 +363,16 @@ class DartBoardPainter extends CustomPainter {
       ..color = innerBullColor
       ..style = PaintingStyle.fill;
 
-    canvas.drawCircle(center, radius * outerBullRadius, outerBullPaint);
-    canvas.drawCircle(center, radius * innerBullRadius, innerBullPaint);
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.outerBullRadius,
+      outerBullPaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerBullRadius,
+      innerBullPaint,
+    );
   }
 
   void _drawWires(Canvas canvas, Offset center, double radius) {
@@ -461,26 +382,66 @@ class DartBoardPainter extends CustomPainter {
       ..strokeWidth = wireStrokeWidth;
 
     // 同心円のワイヤー
-    canvas.drawCircle(center, radius * outerDoubleRadius, wirePaint);
-    canvas.drawCircle(center, radius * innerDoubleRadius, wirePaint);
-    canvas.drawCircle(center, radius * outerSingleRadius, wirePaint);
-    canvas.drawCircle(center, radius * innerSingleRadius, wirePaint);
-    canvas.drawCircle(center, radius * outerTripleRadius, wirePaint);
-    canvas.drawCircle(center, radius * innerTripleRadius, wirePaint);
-    canvas.drawCircle(center, radius * innerInnerSingleRadius, wirePaint);
-    canvas.drawCircle(center, radius * outerBullRadius, wirePaint);
-    canvas.drawCircle(center, radius * innerBullRadius, wirePaint);
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.outerDoubleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerDoubleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.outerSingleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerSingleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.outerTripleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerTripleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerInnerSingleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.outerBullRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerBullRadius,
+      wirePaint,
+    );
 
     // セクション分割線
     for (int i = 0; i < 20; i++) {
       final angle = -math.pi / 2 + i * anglePerSegment - padding;
       final outerPoint = Offset(
-        center.dx + radius * outerDoubleRadius * math.cos(angle),
-        center.dy + radius * outerDoubleRadius * math.sin(angle),
+        center.dx +
+            radius * DartBoardConstants.outerDoubleRadius * math.cos(angle),
+        center.dy +
+            radius * DartBoardConstants.outerDoubleRadius * math.sin(angle),
       );
       final innerPoint = Offset(
-        center.dx + radius * outerBullRadius * math.cos(angle),
-        center.dy + radius * outerBullRadius * math.sin(angle),
+        center.dx +
+            radius * DartBoardConstants.outerBullRadius * math.cos(angle),
+        center.dy +
+            radius * DartBoardConstants.outerBullRadius * math.sin(angle),
       );
 
       canvas.drawLine(innerPoint, outerPoint, wirePaint);
@@ -489,7 +450,7 @@ class DartBoardPainter extends CustomPainter {
 
   void _drawNumbers(Canvas canvas, Offset center, double radius) {
     for (int i = 0; i < 20; i++) {
-      final number = numbers[i];
+      final number = DartBoardConstants.numbers[i];
       final angle =
           -math.pi / 2 + i * anglePerSegment - padding + anglePerSegment / 2;
 
