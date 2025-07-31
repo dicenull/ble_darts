@@ -38,15 +38,16 @@ extension MultiplayerCountUpGameX on MultiplayerCountUpGame {
   bool get isGameActive => state == MultiplayerGameState.playing;
   bool get isGameFinished => state == MultiplayerGameState.finished;
   bool get hasPlayers => players.isNotEmpty;
-  
-  PlayerGameData? get currentPlayer => 
-      players.isNotEmpty && currentPlayerIndex < players.length 
-          ? players[currentPlayerIndex] 
-          : null;
-  
-  List<PlayerGameData> get sortedByScore => 
-      [...players]..sort((a, b) => b.game.totalScore.compareTo(a.game.totalScore));
-  
+
+  PlayerGameData? get currentPlayer =>
+      players.isNotEmpty && currentPlayerIndex < players.length
+      ? players[currentPlayerIndex]
+      : null;
+
+  List<PlayerGameData> get sortedByScore =>
+      [...players]
+        ..sort((a, b) => b.game.totalScore.compareTo(a.game.totalScore));
+
   Duration? get gameDuration {
     if (startTime == null) return null;
     final endTime = this.endTime ?? DateTime.now();
@@ -55,26 +56,26 @@ extension MultiplayerCountUpGameX on MultiplayerCountUpGame {
 
   MultiplayerCountUpGame addPlayer(Player player) {
     if (state != MultiplayerGameState.setup) return this;
-    
+
     final newPlayerData = PlayerGameData(
       player: player,
       game: const CountUpGame(),
       isActive: players.isEmpty,
     );
-    
-    return copyWith(
-      players: [...players, newPlayerData],
-    );
+
+    return copyWith(players: [...players, newPlayerData]);
   }
 
   MultiplayerCountUpGame removePlayer(String playerId) {
     if (state != MultiplayerGameState.setup) return this;
-    
-    final updatedPlayers = players.where((p) => p.player.id != playerId).toList();
-    final newCurrentIndex = currentPlayerIndex >= updatedPlayers.length 
-        ? 0 
+
+    final updatedPlayers = players
+        .where((p) => p.player.id != playerId)
+        .toList();
+    final newCurrentIndex = currentPlayerIndex >= updatedPlayers.length
+        ? 0
         : currentPlayerIndex;
-    
+
     return copyWith(
       players: updatedPlayers,
       currentPlayerIndex: newCurrentIndex,
@@ -83,14 +84,16 @@ extension MultiplayerCountUpGameX on MultiplayerCountUpGame {
 
   MultiplayerCountUpGame startGame() {
     if (players.isEmpty) return this;
-    
-    final updatedPlayers = players.map((playerData) => 
-      playerData.copyWith(
-        game: playerData.game.startGame(),
-        isActive: players.indexOf(playerData) == 0,
-      )
-    ).toList();
-    
+
+    final updatedPlayers = players
+        .map(
+          (playerData) => playerData.copyWith(
+            game: playerData.game.startGame(),
+            isActive: players.indexOf(playerData) == 0,
+          ),
+        )
+        .toList();
+
     return copyWith(
       state: MultiplayerGameState.playing,
       players: updatedPlayers,
@@ -102,23 +105,29 @@ extension MultiplayerCountUpGameX on MultiplayerCountUpGame {
 
   MultiplayerCountUpGame addThrow(DartThrow dartThrow) {
     if (!isGameActive || players.isEmpty) return this;
-    
+
     final currentPlayerData = players[currentPlayerIndex];
     final updatedGame = currentPlayerData.game.addThrow(dartThrow);
-    
+
     final updatedPlayers = [...players];
-    updatedPlayers[currentPlayerIndex] = currentPlayerData.copyWith(game: updatedGame);
-    
+    updatedPlayers[currentPlayerIndex] = currentPlayerData.copyWith(
+      game: updatedGame,
+    );
+
     // ゲーム終了チェックと次のプレイヤーへの切り替え
     if (updatedGame.isGameFinished || updatedGame.currentThrow == 1) {
       final nextPlayerIndex = _getNextPlayerIndex();
-      final nextPlayersState = updatedPlayers.map((p) => 
-        p.copyWith(isActive: updatedPlayers.indexOf(p) == nextPlayerIndex)
-      ).toList();
-      
+      final nextPlayersState = updatedPlayers
+          .map(
+            (p) => p.copyWith(
+              isActive: updatedPlayers.indexOf(p) == nextPlayerIndex,
+            ),
+          )
+          .toList();
+
       // 全プレイヤーがゲーム終了したかチェック
       final allFinished = nextPlayersState.every((p) => p.game.isGameFinished);
-      
+
       return copyWith(
         players: nextPlayersState,
         currentPlayerIndex: nextPlayerIndex,
@@ -126,13 +135,13 @@ extension MultiplayerCountUpGameX on MultiplayerCountUpGame {
         endTime: allFinished ? DateTime.now() : endTime,
       );
     }
-    
+
     return copyWith(players: updatedPlayers);
   }
 
   int _getNextPlayerIndex() {
     if (players.isEmpty) return 0;
-    
+
     // まだ終了していないプレイヤーの中から次のプレイヤーを選択
     for (int i = 1; i <= players.length; i++) {
       final nextIndex = (currentPlayerIndex + i) % players.length;
@@ -140,18 +149,20 @@ extension MultiplayerCountUpGameX on MultiplayerCountUpGame {
         return nextIndex;
       }
     }
-    
+
     return currentPlayerIndex;
   }
 
   MultiplayerCountUpGame resetGame() {
-    final resetPlayers = players.map((playerData) =>
-      playerData.copyWith(
-        game: const CountUpGame(),
-        isActive: players.indexOf(playerData) == 0,
-      )
-    ).toList();
-    
+    final resetPlayers = players
+        .map(
+          (playerData) => playerData.copyWith(
+            game: const CountUpGame(),
+            isActive: players.indexOf(playerData) == 0,
+          ),
+        )
+        .toList();
+
     return copyWith(
       state: MultiplayerGameState.setup,
       players: resetPlayers,

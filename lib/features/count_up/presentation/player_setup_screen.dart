@@ -20,7 +20,9 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
     super.initState();
     // デフォルトでPlayer 1を追加
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final gameNotifier = ref.read(multiplayerCountUpGameNotifierProvider.notifier);
+      final gameNotifier = ref.read(
+        multiplayerCountUpGameNotifierProvider.notifier,
+      );
       gameNotifier.addPlayer('Player 1');
     });
   }
@@ -34,12 +36,12 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final game = ref.watch(multiplayerCountUpGameNotifierProvider);
-    final gameNotifier = ref.read(multiplayerCountUpGameNotifierProvider.notifier);
+    final gameNotifier = ref.read(
+      multiplayerCountUpGameNotifierProvider.notifier,
+    );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('カウントアップ'),
-      ),
+      appBar: AppBar(title: const Text('カウントアップ')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -63,7 +65,9 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
                             if (value == null || value.trim().isEmpty) {
                               return '名前を入力してください';
                             }
-                            if (game.players.any((p) => p.player.name == value.trim())) {
+                            if (game.players.any(
+                              (p) => p.player.name == value.trim(),
+                            )) {
                               return 'この名前は既に使用されています';
                             }
                             return null;
@@ -81,9 +85,9 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // プレイヤーリスト
             Expanded(
               child: Card(
@@ -99,8 +103,10 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
                             itemBuilder: (context, index) {
                               final playerData = game.players[index];
                               return Card(
-                                color: index == 0 
-                                    ? Theme.of(context).colorScheme.primaryContainer
+                                color: index == 0
+                                    ? Theme.of(
+                                        context,
+                                      ).colorScheme.primaryContainer
                                     : null,
                                 child: ListTile(
                                   leading: CircleAvatar(
@@ -109,15 +115,18 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
                                   title: Text(
                                     playerData.player.name,
                                     style: TextStyle(
-                                      fontWeight: index == 0 
-                                          ? FontWeight.bold 
+                                      fontWeight: index == 0
+                                          ? FontWeight.bold
                                           : FontWeight.normal,
                                     ),
                                   ),
-                                  trailing: game.players.length > 1 
+                                  trailing: game.players.length > 1
                                       ? IconButton(
                                           icon: const Icon(Icons.delete),
-                                          onPressed: () => gameNotifier.removePlayer(playerData.player.id),
+                                          onPressed: () =>
+                                              gameNotifier.removePlayer(
+                                                playerData.player.id,
+                                              ),
                                         )
                                       : null,
                                 ),
@@ -131,15 +140,17 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // ゲーム開始ボタン
             SizedBox(
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: game.players.isNotEmpty ? () => _startGame(context, gameNotifier) : null,
+                onPressed: game.players.isNotEmpty
+                    ? () => _startGame(context, gameNotifier)
+                    : null,
                 style: ElevatedButton.styleFrom(
                   textStyle: const TextStyle(
                     fontSize: 20,
@@ -162,7 +173,10 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
     }
   }
 
-  void _startGame(BuildContext context, MultiplayerCountUpGameNotifier gameNotifier) {
+  void _startGame(
+    BuildContext context,
+    MultiplayerCountUpGameNotifier gameNotifier,
+  ) {
     gameNotifier.startGame();
     Navigator.pushReplacement(
       context,

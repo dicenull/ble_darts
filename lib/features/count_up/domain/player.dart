@@ -13,15 +13,14 @@ class Player with _$Player {
     @Default(0) int gamesWon,
   }) = _Player;
 
-  factory Player.fromJson(Map<String, dynamic> json) =>
-      _$PlayerFromJson(json);
+  factory Player.fromJson(Map<String, dynamic> json) => _$PlayerFromJson(json);
 }
 
 extension PlayerX on Player {
   double get winRate => gamesPlayed > 0 ? gamesWon / gamesPlayed : 0.0;
-  
+
   double get averageScore => gamesPlayed > 0 ? totalScore / gamesPlayed : 0.0;
-  
+
   Player updateAfterGame({required int gameScore, required bool isWinner}) {
     return copyWith(
       totalScore: totalScore + gameScore,

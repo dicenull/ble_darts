@@ -51,13 +51,11 @@ class MultiplayerCountUpGameNotifier extends _$MultiplayerCountUpGameNotifier {
   }
 
   void addPlayer(String name) {
-    if (name.trim().isEmpty || state.state != MultiplayerGameState.setup) return;
-    
-    final player = Player(
-      id: _uuid.v4(),
-      name: name.trim(),
-    );
-    
+    if (name.trim().isEmpty || state.state != MultiplayerGameState.setup)
+      return;
+
+    final player = Player(id: _uuid.v4(), name: name.trim());
+
     state = state.addPlayer(player);
   }
 
@@ -120,13 +118,22 @@ class MultiplayerGameStatisticsData {
     required this.winner,
   });
 
-  List<PlayerGameData> get sortedPlayers => 
-      [...players]..sort((a, b) => b.game.totalScore.compareTo(a.game.totalScore));
+  List<PlayerGameData> get sortedPlayers =>
+      [...players]
+        ..sort((a, b) => b.game.totalScore.compareTo(a.game.totalScore));
 
-  int get totalThrows => players.fold(0, (sum, player) => 
-      sum + player.game.rounds.fold(0, (roundSum, round) => roundSum + round.length));
+  int get totalThrows => players.fold(
+    0,
+    (sum, player) =>
+        sum +
+        player.game.rounds.fold(
+          0,
+          (roundSum, round) => roundSum + round.length,
+        ),
+  );
 
   double get averageScore => players.isNotEmpty
-      ? players.fold(0, (sum, player) => sum + player.game.totalScore) / players.length
+      ? players.fold(0, (sum, player) => sum + player.game.totalScore) /
+            players.length
       : 0.0;
 }
