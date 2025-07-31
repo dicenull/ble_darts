@@ -12,7 +12,8 @@ class MultiplayerGameWidget extends ConsumerStatefulWidget {
   const MultiplayerGameWidget({super.key});
 
   @override
-  ConsumerState<MultiplayerGameWidget> createState() => _MultiplayerGameWidgetState();
+  ConsumerState<MultiplayerGameWidget> createState() =>
+      _MultiplayerGameWidgetState();
 }
 
 class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
@@ -21,21 +22,38 @@ class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
   @override
   Widget build(BuildContext context) {
     final game = ref.watch(multiplayerCountUpGameNotifierProvider);
-    final gameNotifier = ref.read(multiplayerCountUpGameNotifierProvider.notifier);
+    final gameNotifier = ref.read(
+      multiplayerCountUpGameNotifierProvider.notifier,
+    );
     final bluetoothState = ref.watch(bluetoothNotifierProvider);
 
-    ref.listen<MultiplayerCountUpGame>(multiplayerCountUpGameNotifierProvider, (previous, current) {
+    ref.listen<MultiplayerCountUpGame>(multiplayerCountUpGameNotifierProvider, (
+      previous,
+      current,
+    ) {
       if (previous != null && current.currentPlayer != null) {
         final previousPlayerGame = previous.currentPlayer?.game;
-        
+
         if (previousPlayerGame != null &&
             current.currentPlayer!.game.rounds.isNotEmpty &&
-            current.currentPlayer!.game.rounds[current.currentPlayer!.game.currentRound - 1].length >
+            current
+                    .currentPlayer!
+                    .game
+                    .rounds[current.currentPlayer!.game.currentRound - 1]
+                    .length >
                 (previous.currentPlayer?.game.rounds.isNotEmpty == true &&
-                 previous.currentPlayer!.game.rounds.length >= previous.currentPlayer!.game.currentRound
-                    ? previous.currentPlayer!.game.rounds[previous.currentPlayer!.game.currentRound - 1].length
+                        previous.currentPlayer!.game.rounds.length >=
+                            previous.currentPlayer!.game.currentRound
+                    ? previous
+                          .currentPlayer!
+                          .game
+                          .rounds[previous.currentPlayer!.game.currentRound - 1]
+                          .length
                     : 0)) {
-          final currentRoundThrows = current.currentPlayer!.game.rounds[current.currentPlayer!.game.currentRound - 1];
+          final currentRoundThrows = current
+              .currentPlayer!
+              .game
+              .rounds[current.currentPlayer!.game.currentRound - 1];
           final latestThrow = currentRoundThrows.last;
           setState(() {
             _highlightedPosition = latestThrow.position;
@@ -47,16 +65,15 @@ class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
     return Column(
       children: [
         // Bluetooth接続状態
-        if (bluetoothState.connectionState != BluetoothConnectionState.connected)
+        if (bluetoothState.connectionState !=
+            BluetoothConnectionState.connected)
           Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.errorContainer,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              border: Border.all(color: Theme.of(context).colorScheme.error),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -78,7 +95,7 @@ class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
               ],
             ),
           ),
-        
+
         Expanded(
           child: Row(
             children: [
@@ -91,33 +108,32 @@ class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
                     if (game.currentPlayer != null)
                       CurrentPlayerWidget(playerData: game.currentPlayer!),
                     const SizedBox(height: 8),
-                    
+
                     // プレイヤーリストとスコア
-                    Expanded(
-                      child: MultiplayerScoreWidget(game: game),
-                    ),
-                    
+                    Expanded(child: MultiplayerScoreWidget(game: game)),
+
                     const SizedBox(height: 8),
-                    
+
                     // ゲーム終了時の結果
                     if (game.isGameFinished)
                       MultiplayerResultWidget(
                         game: game,
                         onNewGame: () => gameNotifier.resetGame(),
                       ),
-                    
+
                     // リセットボタン
                     if (game.isGameActive)
                       ElevatedButton(
-                        onPressed: () => _showResetDialog(context, gameNotifier),
-                        child: const Text('ゲームリセット'),
+                        onPressed: () =>
+                            _showResetDialog(context, gameNotifier),
+                        child: const Text('RESET'),
                       ),
                   ],
                 ),
               ),
-              
+
               const SizedBox(width: 8),
-              
+
               // 中央: ダーツボード
               Expanded(
                 flex: 4,
@@ -133,7 +149,9 @@ class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.shadow.withValues(alpha: 0.3),
                             blurRadius: 15,
                             offset: const Offset(0, 5),
                           ),
@@ -160,14 +178,11 @@ class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(width: 8),
-              
-              // 右列: 統計情報
-              Expanded(
-                flex: 2,
-                child: MultiplayerStatisticsWidget(game: game),
-              ),
+
+              // 右列: プレイ中のプレイヤーの統計
+              Expanded(flex: 2, child: MultiplayerStatisticsWidget(game: game)),
             ],
           ),
         ),
@@ -182,19 +197,18 @@ class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('ゲームをリセット'),
-        content: const Text('現在のゲームを中断してリセットしますか？'),
+        title: const Text('RESET?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
+            child: const Text('NO'),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               gameNotifier.resetGame();
             },
-            child: const Text('リセット'),
+            child: const Text('YES'),
           ),
         ],
       ),

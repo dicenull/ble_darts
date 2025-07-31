@@ -32,10 +32,6 @@ class _PlayerSetupWidgetState extends ConsumerState<PlayerSetupWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'プレイヤー設定',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
             const SizedBox(height: 16),
             
             // プレイヤー追加フォーム
@@ -47,8 +43,7 @@ class _PlayerSetupWidgetState extends ConsumerState<PlayerSetupWidget> {
                     child: TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
-                        labelText: 'プレイヤー名',
-                        hintText: '名前を入力してください',
+                        hintText: 'プレイヤー名',
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
@@ -66,7 +61,7 @@ class _PlayerSetupWidgetState extends ConsumerState<PlayerSetupWidget> {
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () => _addPlayer(gameNotifier),
-                    child: const Text('追加'),
+                    child: const Text('+'),
                   ),
                 ],
               ),
@@ -75,11 +70,6 @@ class _PlayerSetupWidgetState extends ConsumerState<PlayerSetupWidget> {
             
             // プレイヤーリスト
             if (game.players.isNotEmpty) ...[
-              Text(
-                'プレイヤー (${game.players.length}人)',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
               ...game.players.asMap().entries.map((entry) {
                 final index = entry.key;
                 final playerData = entry.value;
@@ -114,7 +104,7 @@ class _PlayerSetupWidgetState extends ConsumerState<PlayerSetupWidget> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: game.hasPlayers ? () => gameNotifier.startGame() : null,
-                child: const Text('ゲーム開始'),
+                child: const Text('START'),
               ),
             ),
           ],

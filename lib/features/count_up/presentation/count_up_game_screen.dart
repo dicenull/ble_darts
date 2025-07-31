@@ -232,19 +232,18 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('ゲームをリセット'),
-        content: const Text('現在のゲームを中断してリセットしますか？'),
+        title: const Text('RESET?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
+            child: const Text('NO'),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               gameNotifier.resetGame();
             },
-            child: const Text('リセット'),
+            child: const Text('YES'),
           ),
         ],
       ),
