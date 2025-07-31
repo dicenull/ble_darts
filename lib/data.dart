@@ -81,7 +81,7 @@ const dat = {
   0x19: "S5_O",
   0x41: "T5",
   0x05: "S5_I",
-  0x51: "BULL",
+  0x51: "S-BULL",
   0x52: "D-BULL",
   0x54: "CHANGE",
 };

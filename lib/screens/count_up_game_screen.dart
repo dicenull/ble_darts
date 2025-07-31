@@ -170,7 +170,7 @@ class _CountUpGameScreenState extends State<CountUpGameScreen> {
                 _buildTestButton('S20', 20),
                 _buildTestButton('D20', 40),
                 _buildTestButton('T20', 60),
-                _buildTestButton('BULL', 50),
+                _buildTestButton('S-BULL', 50),
                 _buildTestButton('S1', 1),
                 _buildTestButton('S5', 5),
                 _buildTestButton('S10', 10),

@@ -56,15 +56,15 @@ void main() {
       expect(dartThrow.score, equals(60));
     });
 
-    test('BULLのスコアを正しく計算できる', () {
+    test('S-BULLのスコアを正しく計算できる', () {
       // Arrange
-      const position = 'BULL';
+      const position = 'S-BULL';
 
       // Act
       final dartThrow = DartThrowX.fromDartsLiveData(position);
 
       // Assert
-      expect(dartThrow.position, equals('BULL'));
+      expect(dartThrow.position, equals('S-BULL'));
       expect(dartThrow.score, equals(50));
     });
 
@@ -77,7 +77,7 @@ void main() {
 
       // Assert
       expect(dartThrow.position, equals('D-BULL'));
-      expect(dartThrow.score, equals(25));
+      expect(dartThrow.score, equals(50));
     });
 
     test('CHANGEのスコアを0として計算できる', () {

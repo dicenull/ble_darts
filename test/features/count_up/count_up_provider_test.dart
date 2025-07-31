@@ -155,16 +155,16 @@ void main() {
       // Total: 120
 
       // Round 2: Bull scores
-      notifier.addManualThrow('BULL'); // 50
-      notifier.addManualThrow('D-BULL'); // 25
+      notifier.addManualThrow('S-BULL'); // 50
+      notifier.addManualThrow('D-BULL'); // 50
       notifier.addManualThrow('CHANGE'); // 0
-      // Total: 75
+      // Total: 100
 
       final game = container.read(countUpGameNotifierProvider);
-      expect(game.totalScore, equals(195));
+      expect(game.totalScore, equals(220));
       expect(game.currentRound, equals(3));
       expect(game.roundScores[0], equals(120));
-      expect(game.roundScores[1], equals(75));
+      expect(game.roundScores[1], equals(100));
     });
   });
 

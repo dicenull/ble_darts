@@ -36,7 +36,7 @@ String? calculatePositionFromOffset(Offset offset, Size size) {
   
   // ブル領域
   if (normalizedDistance <= DartBoardConstants.innerBullRadius) {
-    return 'BULL';
+    return 'S-BULL';
   } else if (normalizedDistance <= DartBoardConstants.outerBullRadius) {
     return 'D-BULL';
   }
@@ -76,9 +76,9 @@ void main() {
     const size = Size(400, 400);
     const center = Offset(200, 200);
     
-    test('should detect BULL at center', () {
+    test('should detect S-BULL at center', () {
       final position = calculatePositionFromOffset(center, size);
-      expect(position, 'BULL');
+      expect(position, 'S-BULL');
     });
     
     test('should detect D-BULL in outer bull area', () {

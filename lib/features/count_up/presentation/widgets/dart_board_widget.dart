@@ -114,7 +114,7 @@ class _DartBoardWidgetState extends State<DartBoardWidget>
 
     // ブル領域かどうかチェック
     if (normalizedDistance <= DartBoardPainter.innerBullRadius) {
-      return 'BULL';
+      return 'S-BULL';
     } else if (normalizedDistance <= DartBoardPainter.outerBullRadius) {
       return 'D-BULL';
     }
@@ -258,7 +258,7 @@ class DartBoardPainter extends CustomPainter {
   bool _isPositionHighlighted(int number) {
     if (highlightedPosition == null) return false;
 
-    if (highlightedPosition == 'BULL' || highlightedPosition == 'D-BULL') {
+    if (highlightedPosition == 'S-BULL' || highlightedPosition == 'D-BULL') {
       return false;
     }
 
@@ -274,7 +274,7 @@ class DartBoardPainter extends CustomPainter {
   String? _getHighlightedType() {
     if (highlightedPosition == null) return null;
 
-    if (highlightedPosition == 'BULL' || highlightedPosition == 'D-BULL') {
+    if (highlightedPosition == 'S-BULL' || highlightedPosition == 'D-BULL') {
       return highlightedPosition;
     }
 
@@ -416,7 +416,7 @@ class DartBoardPainter extends CustomPainter {
     final outerBullHighlight = highlightedPosition == 'D-BULL'
         ? highlightIntensity
         : 0.0;
-    final innerBullHighlight = highlightedPosition == 'BULL'
+    final innerBullHighlight = highlightedPosition == 'S-BULL'
         ? highlightIntensity
         : 0.0;
 

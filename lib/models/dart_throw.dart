@@ -18,8 +18,8 @@ class DartThrow {
   }
 
   static int _calculateScore(String position) {
-    if (position == 'BULL') return 50;
-    if (position == 'D-BULL') return 25;
+    if (position == 'S-BULL') return 50;
+    if (position == 'D-BULL') return 50;
     if (position == 'CHANGE') return 0;
 
     final regex = RegExp(r'([SDT])(\d+)');
