@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:ble_darts/shared/models/dart_board_model.dart';
+import 'package:flutter/material.dart';
 
 class DartBoardWidget extends StatefulWidget {
   final String? highlightedPosition;
@@ -260,12 +260,12 @@ class DartBoardPainter extends CustomPainter {
   }
 
   ({Color single, Color double, Color triple}) _getSegmentColors(int index) {
-    final isBlack = index % 2 == 1;
+    final isBlack = index % 2 == 0;
 
     if (isBlack) {
-      return (single: blackSegment, double: blueSegment, triple: blueSegment);
+      return (single: blackSegment, double: redSegment, triple: redSegment);
     } else {
-      return (single: whiteSegment, double: redSegment, triple: redSegment);
+      return (single: whiteSegment, double: blueSegment, triple: blueSegment);
     }
   }
 
@@ -333,8 +333,8 @@ class DartBoardPainter extends CustomPainter {
         ? highlightIntensity
         : 0.0;
 
-    Color outerBullColor = blueSegment;
-    Color innerBullColor = redSegment;
+    Color outerBullColor = redSegment;
+    Color innerBullColor = blackSegment;
 
     if (outerBullHighlight > 0) {
       outerBullColor =
@@ -363,8 +363,16 @@ class DartBoardPainter extends CustomPainter {
       ..color = innerBullColor
       ..style = PaintingStyle.fill;
 
-    canvas.drawCircle(center, radius * DartBoardConstants.outerBullRadius, outerBullPaint);
-    canvas.drawCircle(center, radius * DartBoardConstants.innerBullRadius, innerBullPaint);
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.outerBullRadius,
+      outerBullPaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerBullRadius,
+      innerBullPaint,
+    );
   }
 
   void _drawWires(Canvas canvas, Offset center, double radius) {
@@ -374,26 +382,66 @@ class DartBoardPainter extends CustomPainter {
       ..strokeWidth = wireStrokeWidth;
 
     // 同心円のワイヤー
-    canvas.drawCircle(center, radius * DartBoardConstants.outerDoubleRadius, wirePaint);
-    canvas.drawCircle(center, radius * DartBoardConstants.innerDoubleRadius, wirePaint);
-    canvas.drawCircle(center, radius * DartBoardConstants.outerSingleRadius, wirePaint);
-    canvas.drawCircle(center, radius * DartBoardConstants.innerSingleRadius, wirePaint);
-    canvas.drawCircle(center, radius * DartBoardConstants.outerTripleRadius, wirePaint);
-    canvas.drawCircle(center, radius * DartBoardConstants.innerTripleRadius, wirePaint);
-    canvas.drawCircle(center, radius * DartBoardConstants.innerInnerSingleRadius, wirePaint);
-    canvas.drawCircle(center, radius * DartBoardConstants.outerBullRadius, wirePaint);
-    canvas.drawCircle(center, radius * DartBoardConstants.innerBullRadius, wirePaint);
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.outerDoubleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerDoubleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.outerSingleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerSingleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.outerTripleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerTripleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerInnerSingleRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.outerBullRadius,
+      wirePaint,
+    );
+    canvas.drawCircle(
+      center,
+      radius * DartBoardConstants.innerBullRadius,
+      wirePaint,
+    );
 
     // セクション分割線
     for (int i = 0; i < 20; i++) {
       final angle = -math.pi / 2 + i * anglePerSegment - padding;
       final outerPoint = Offset(
-        center.dx + radius * DartBoardConstants.outerDoubleRadius * math.cos(angle),
-        center.dy + radius * DartBoardConstants.outerDoubleRadius * math.sin(angle),
+        center.dx +
+            radius * DartBoardConstants.outerDoubleRadius * math.cos(angle),
+        center.dy +
+            radius * DartBoardConstants.outerDoubleRadius * math.sin(angle),
       );
       final innerPoint = Offset(
-        center.dx + radius * DartBoardConstants.outerBullRadius * math.cos(angle),
-        center.dy + radius * DartBoardConstants.outerBullRadius * math.sin(angle),
+        center.dx +
+            radius * DartBoardConstants.outerBullRadius * math.cos(angle),
+        center.dy +
+            radius * DartBoardConstants.outerBullRadius * math.sin(angle),
       );
 
       canvas.drawLine(innerPoint, outerPoint, wirePaint);
