@@ -92,7 +92,8 @@ void main() {
       final dartThrow = DartThrowX.fromDartsLiveData(position);
 
       // Assert
-      expect(dartThrow.position.toDisplayString(), equals('CHANGE'));
+  // number==0 は "CHANGE" として表示される仕様
+  expect(dartThrow.position.toDisplayString(), equals('CHANGE'));
       expect(dartThrow.score, equals(0));
     });
 

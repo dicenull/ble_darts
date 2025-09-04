@@ -28,6 +28,10 @@ class DartPosition with _$DartPosition {
       _$DartPositionFromJson(json);
 
   String toDataString() {
+    // 0はデバイスからの"CHANGE"を表しスコア0扱い
+    if (number == 0) {
+      return 'CHANGE';
+    }
     if (number == 25) {
       return ring == DartRing.double ? 'D-BULL' : 'S-BULL';
     }
@@ -42,6 +46,10 @@ class DartPosition with _$DartPosition {
   }
 
   String toDisplayString() {
+    // 表示用も0は特殊値として"CHANGE"を返す
+    if (number == 0) {
+      return 'CHANGE';
+    }
     if (number == 25) {
       return ring == DartRing.double ? 'D-BULL' : 'S-BULL';
     }
