@@ -1,7 +1,9 @@
 import 'package:ble_darts/models/count_up_game.dart';
+import 'package:ble_darts/shared/models/dart_position.dart';
 import 'package:ble_darts/shared/models/dart_throw.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../bluetooth/data/bluetooth_provider.dart';
 import '../../bluetooth/domain/bluetooth_device.dart';
@@ -10,18 +12,12 @@ import '../domain/multiplayer_count_up_game.dart';
 import 'widgets/dart_board_widget.dart';
 import 'widgets/multiplayer_score_widgets.dart';
 
-class CountUpGameScreen extends ConsumerStatefulWidget {
+class CountUpGameScreen extends HookConsumerWidget {
   const CountUpGameScreen({super.key});
 
   @override
-  ConsumerState<CountUpGameScreen> createState() => _CountUpGameScreenState();
-}
-
-class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
-  String? _highlightedPosition;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final highlightedPosition = useState<DartPosition?>(null);
     final game = ref.watch(multiplayerCountUpGameNotifierProvider);
     final gameNotifier = ref.read(
       multiplayerCountUpGameNotifierProvider.notifier,
@@ -56,9 +52,7 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
               .game
               .rounds[current.currentPlayer!.game.currentRound - 1];
           final latestThrow = currentRoundThrows.last;
-          setState(() {
-            _highlightedPosition = latestThrow.position;
-          });
+          highlightedPosition.value = latestThrow.position;
         }
       }
     });
@@ -140,7 +134,7 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
                         // プレイヤーリストとスコア（1人の場合は簡素化）
                         Expanded(
                           child: game.players.length == 1
-                              ? _buildSinglePlayerScore(game)
+                              ? _SinglePlayerScore(game: game)
                               : MultiplayerScoreWidget(game: game),
                         ),
 
@@ -194,17 +188,14 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: DartBoardWidget(
-                              highlightedPosition: _highlightedPosition,
+                              highlightedPosition: highlightedPosition.value,
                               onHighlightEnd: () {
-                                setState(() {
-                                  _highlightedPosition = null;
-                                });
+                                highlightedPosition.value = null;
                               },
                               onPositionTapped: (position) {
                                 gameNotifier.addManualThrow(position);
-                                setState(() {
-                                  _highlightedPosition = position;
-                                });
+                                highlightedPosition.value =
+                                    DartPosition.fromDisplayString(position);
                               },
                             ),
                           ),
@@ -230,7 +221,41 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
   }
 
   // 1人プレイ用の簡素化されたスコア表示
-  Widget _buildSinglePlayerScore(MultiplayerCountUpGame game) {
+
+  void _showResetDialog(
+    BuildContext context,
+    MultiplayerCountUpGameNotifier gameNotifier,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('RESET?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('NO'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              gameNotifier.resetGame();
+              Navigator.pop(context); // プレイヤー設定画面に戻る
+            },
+            child: const Text('YES'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SinglePlayerScore extends StatelessWidget {
+  const _SinglePlayerScore({required this.game});
+
+  final MultiplayerCountUpGame game;
+
+  @override
+  Widget build(BuildContext context) {
     final player = game.players.first;
 
     return Card(
@@ -261,32 +286,6 @@ class _CountUpGameScreenState extends ConsumerState<CountUpGameScreen> {
       ),
     );
   }
-
-  void _showResetDialog(
-    BuildContext context,
-    MultiplayerCountUpGameNotifier gameNotifier,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('RESET?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('NO'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              gameNotifier.resetGame();
-              Navigator.pop(context); // プレイヤー設定画面に戻る
-            },
-            child: const Text('YES'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _RoundThrows extends StatelessWidget {
@@ -302,7 +301,7 @@ class _RoundThrows extends StatelessWidget {
       children: [
         ...List.generate(CountUpGame.throwsPerRound, (index) {
           final dartThrow = index < throws.length
-              ? throws[index].position
+              ? throws[index].position.toDisplayString()
               : '-';
           return Chip(
             label: ConstrainedBox(

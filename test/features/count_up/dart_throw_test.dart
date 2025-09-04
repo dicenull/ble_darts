@@ -1,5 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'package:ble_darts/shared/models/dart_position.dart';
 import 'package:ble_darts/shared/models/dart_throw.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DartThrow', () {
@@ -9,13 +10,16 @@ void main() {
 
       // Act
       final dartThrow = DartThrow(
-        position: 'S20',
+        position: DartPosition(number: 20, ring: DartRing.single),
         score: 20,
         timestamp: timestamp,
       );
 
       // Assert
-      expect(dartThrow.position, equals('S20'));
+      expect(
+        dartThrow.position,
+        equals(DartPosition(number: 20, ring: DartRing.single)),
+      );
       expect(dartThrow.score, equals(20));
       expect(dartThrow.timestamp, equals(timestamp));
     });
@@ -28,7 +32,7 @@ void main() {
       final dartThrow = DartThrowX.fromDartsLiveData(position);
 
       // Assert
-      expect(dartThrow.position, equals('S20'));
+      expect(dartThrow.position.toDisplayString(), equals('S20'));
       expect(dartThrow.score, equals(20));
     });
 
@@ -40,7 +44,7 @@ void main() {
       final dartThrow = DartThrowX.fromDartsLiveData(position);
 
       // Assert
-      expect(dartThrow.position, equals('D20'));
+      expect(dartThrow.position.toDisplayString(), equals('D20'));
       expect(dartThrow.score, equals(40));
     });
 
@@ -52,7 +56,7 @@ void main() {
       final dartThrow = DartThrowX.fromDartsLiveData(position);
 
       // Assert
-      expect(dartThrow.position, equals('T20'));
+      expect(dartThrow.position.toDisplayString(), equals('T20'));
       expect(dartThrow.score, equals(60));
     });
 
@@ -64,8 +68,8 @@ void main() {
       final dartThrow = DartThrowX.fromDartsLiveData(position);
 
       // Assert
-      expect(dartThrow.position, equals('S-BULL'));
-      expect(dartThrow.score, equals(50));
+      expect(dartThrow.position.toDisplayString(), equals('S-BULL'));
+      expect(dartThrow.score, equals(25));
     });
 
     test('D-BULLのスコアを正しく計算できる', () {
@@ -76,7 +80,7 @@ void main() {
       final dartThrow = DartThrowX.fromDartsLiveData(position);
 
       // Assert
-      expect(dartThrow.position, equals('D-BULL'));
+      expect(dartThrow.position.toDisplayString(), equals('D-BULL'));
       expect(dartThrow.score, equals(50));
     });
 
@@ -88,20 +92,19 @@ void main() {
       final dartThrow = DartThrowX.fromDartsLiveData(position);
 
       // Assert
-      expect(dartThrow.position, equals('CHANGE'));
+      expect(dartThrow.position.toDisplayString(), equals('CHANGE'));
       expect(dartThrow.score, equals(0));
     });
 
-    test('無効なポジションのスコアを0として計算できる', () {
+    test('無効なポジションで例外が発生する', () {
       // Arrange
       const position = 'INVALID';
 
-      // Act
-      final dartThrow = DartThrowX.fromDartsLiveData(position);
-
-      // Assert
-      expect(dartThrow.position, equals('INVALID'));
-      expect(dartThrow.score, equals(0));
+      // Act & Assert
+      expect(
+        () => DartThrowX.fromDartsLiveData(position),
+        throwsFormatException,
+      );
     });
 
     test('すべてのダーツポジションを正しく処理できる', () {

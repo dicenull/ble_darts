@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../../shared/models/dart_position.dart';
 import '../../../bluetooth/data/bluetooth_provider.dart';
 import '../../../bluetooth/domain/bluetooth_device.dart';
 import '../../data/multiplayer_count_up_provider.dart';
@@ -8,19 +10,12 @@ import '../../domain/multiplayer_count_up_game.dart';
 import 'dart_board_widget.dart';
 import 'multiplayer_score_widgets.dart';
 
-class MultiplayerGameWidget extends ConsumerStatefulWidget {
+class MultiplayerGameWidget extends HookConsumerWidget {
   const MultiplayerGameWidget({super.key});
 
   @override
-  ConsumerState<MultiplayerGameWidget> createState() =>
-      _MultiplayerGameWidgetState();
-}
-
-class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
-  String? _highlightedPosition;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final highlightedPosition = useState<DartPosition?>(null);
     final game = ref.watch(multiplayerCountUpGameNotifierProvider);
     final gameNotifier = ref.read(
       multiplayerCountUpGameNotifierProvider.notifier,
@@ -55,9 +50,7 @@ class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
               .game
               .rounds[current.currentPlayer!.game.currentRound - 1];
           final latestThrow = currentRoundThrows.last;
-          setState(() {
-            _highlightedPosition = latestThrow.position;
-          });
+          highlightedPosition.value = latestThrow.position;
         }
       }
     });
@@ -160,17 +153,13 @@ class _MultiplayerGameWidgetState extends ConsumerState<MultiplayerGameWidget> {
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: DartBoardWidget(
-                          highlightedPosition: _highlightedPosition,
+                          highlightedPosition: highlightedPosition.value,
                           onHighlightEnd: () {
-                            setState(() {
-                              _highlightedPosition = null;
-                            });
+                            highlightedPosition.value = null;
                           },
                           onPositionTapped: (position) {
                             gameNotifier.addManualThrow(position);
-                            setState(() {
-                              _highlightedPosition = position;
-                            });
+                            highlightedPosition.value = DartPosition.fromDisplayString(position);
                           },
                         ),
                       ),
