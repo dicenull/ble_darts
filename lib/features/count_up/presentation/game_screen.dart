@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../bluetooth/data/bluetooth_provider.dart';
 import '../../bluetooth/domain/bluetooth_device.dart';
 import 'player_setup_screen.dart';

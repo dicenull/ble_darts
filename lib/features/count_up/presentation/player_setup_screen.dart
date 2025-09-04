@@ -1,40 +1,46 @@
+import 'package:ble_darts/features/count_up/presentation/count_up_game_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../data/multiplayer_count_up_provider.dart';
-import 'count_up_game_screen.dart';
 
-class PlayerSetupScreen extends ConsumerStatefulWidget {
+class PlayerSetupScreen extends HookConsumerWidget {
   const PlayerSetupScreen({super.key});
 
   @override
-  ConsumerState<PlayerSetupScreen> createState() => _PlayerSetupScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final nameController = useTextEditingController();
+    final formKey = useMemoized(() => GlobalKey<FormState>());
 
-class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
-  final _nameController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+    void addPlayer(MultiplayerCountUpGameNotifier gameNotifier) {
+      if (formKey.currentState!.validate()) {
+        gameNotifier.addPlayer(nameController.text);
+        nameController.clear();
+      }
+    }
 
-  @override
-  void initState() {
-    super.initState();
-    // デフォルトでPlayer 1を追加
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final gameNotifier = ref.read(
-        multiplayerCountUpGameNotifierProvider.notifier,
+    void startGame(
+      BuildContext context,
+      MultiplayerCountUpGameNotifier gameNotifier,
+    ) {
+      gameNotifier.startGame();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const CountUpGameScreen()),
       );
-      gameNotifier.addPlayer('Player 1');
-    });
-  }
+    }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+    // デフォルトでPlayer 1を追加
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final gameNotifier = ref.read(
+          multiplayerCountUpGameNotifierProvider.notifier,
+        );
+        gameNotifier.addPlayer('Player 1');
+      });
+      return null;
+    }, []);
     final game = ref.watch(multiplayerCountUpGameNotifierProvider);
     final gameNotifier = ref.read(
       multiplayerCountUpGameNotifierProvider.notifier,
@@ -51,12 +57,12 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Form(
-                  key: _formKey,
+                  key: formKey,
                   child: Row(
                     children: [
                       Expanded(
                         child: TextFormField(
-                          controller: _nameController,
+                          controller: nameController,
                           decoration: const InputDecoration(
                             hintText: 'プレイヤー名',
                             border: OutlineInputBorder(),
@@ -72,12 +78,12 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
                             }
                             return null;
                           },
-                          onFieldSubmitted: (_) => _addPlayer(gameNotifier),
+                          onFieldSubmitted: (_) => addPlayer(gameNotifier),
                         ),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
-                        onPressed: () => _addPlayer(gameNotifier),
+                        onPressed: () => addPlayer(gameNotifier),
                         child: const Text('+'),
                       ),
                     ],
@@ -149,7 +155,7 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
               height: 56,
               child: ElevatedButton(
                 onPressed: game.players.isNotEmpty
-                    ? () => _startGame(context, gameNotifier)
+                    ? () => startGame(context, gameNotifier)
                     : null,
                 style: ElevatedButton.styleFrom(
                   textStyle: const TextStyle(
@@ -163,24 +169,6 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  void _addPlayer(MultiplayerCountUpGameNotifier gameNotifier) {
-    if (_formKey.currentState!.validate()) {
-      gameNotifier.addPlayer(_nameController.text);
-      _nameController.clear();
-    }
-  }
-
-  void _startGame(
-    BuildContext context,
-    MultiplayerCountUpGameNotifier gameNotifier,
-  ) {
-    gameNotifier.startGame();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const CountUpGameScreen()),
     );
   }
 }

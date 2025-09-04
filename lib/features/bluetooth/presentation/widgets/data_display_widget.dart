@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class DataDisplayWidget extends StatefulWidget {
+class DataDisplayWidget extends HookWidget {
   final List<String> receivedData;
   final VoidCallback onClear;
 
@@ -11,34 +12,24 @@ class DataDisplayWidget extends StatefulWidget {
   });
 
   @override
-  State<DataDisplayWidget> createState() => _DataDisplayWidgetState();
-}
-
-class _DataDisplayWidgetState extends State<DataDisplayWidget> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void didUpdateWidget(DataDisplayWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.receivedData.length > oldWidget.receivedData.length) {
-      _autoScroll();
-    }
-  }
-
-  void _autoScroll() {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final scrollController = useScrollController();
+
+    // Auto scroll when new data arrives
+    useEffect(() {
+      if (receivedData.isNotEmpty) {
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (scrollController.hasClients) {
+            scrollController.animateTo(
+              scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+      }
+      return null;
+    }, [receivedData.length]);
     return Container(
       height: 300,
       margin: const EdgeInsets.all(16),
@@ -65,7 +56,7 @@ class _DataDisplayWidgetState extends State<DataDisplayWidget> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton(
-                  onPressed: widget.onClear,
+                  onPressed: onClear,
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(60, 30),
                   ),
@@ -75,7 +66,7 @@ class _DataDisplayWidgetState extends State<DataDisplayWidget> {
             ),
           ),
           Expanded(
-            child: widget.receivedData.isEmpty
+            child: receivedData.isEmpty
                 ? const Center(
                     child: Text(
                       'データを受信していません',
@@ -83,8 +74,8 @@ class _DataDisplayWidgetState extends State<DataDisplayWidget> {
                     ),
                   )
                 : ListView.builder(
-                    controller: _scrollController,
-                    itemCount: widget.receivedData.length,
+                    controller: scrollController,
+                    itemCount: receivedData.length,
                     itemBuilder: (context, index) {
                       return Container(
                         padding: const EdgeInsets.symmetric(
@@ -97,7 +88,7 @@ class _DataDisplayWidgetState extends State<DataDisplayWidget> {
                           ),
                         ),
                         child: Text(
-                          widget.receivedData[index],
+                          receivedData[index],
                           style: const TextStyle(fontFamily: 'monospace'),
                         ),
                       );
@@ -107,11 +98,5 @@ class _DataDisplayWidgetState extends State<DataDisplayWidget> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 }
