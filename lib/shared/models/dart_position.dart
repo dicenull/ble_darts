@@ -3,21 +3,14 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'dart_position.freezed.dart';
 part 'dart_position.g.dart';
 
-enum DartRing {
-  single,
-  double,
-  triple,
-}
+enum DartRing { single, double, triple }
 
-enum DartArea {
-  inner,
-  outer,
-}
+enum DartArea { inner, outer }
 
 @freezed
 class DartPosition with _$DartPosition {
   const DartPosition._();
-  
+
   const factory DartPosition({
     required int number,
     required DartRing ring,
@@ -37,9 +30,8 @@ class DartPosition with _$DartPosition {
     }
 
     return switch (ring) {
-      DartRing.single => area == DartArea.inner
-          ? 'S${number}_I'
-          : 'S${number}_O',
+      DartRing.single =>
+        area == DartArea.inner ? 'S${number}_I' : 'S${number}_O',
       DartRing.double => 'D$number',
       DartRing.triple => 'T$number',
     };
@@ -85,13 +77,13 @@ class DartPosition with _$DartPosition {
       ring: type == 'S'
           ? DartRing.single
           : type == 'D'
-              ? DartRing.double
-              : DartRing.triple,
+          ? DartRing.double
+          : DartRing.triple,
       area: areaStr == '_I'
           ? DartArea.inner
           : areaStr == '_O'
-              ? DartArea.outer
-              : null,
+          ? DartArea.outer
+          : null,
     );
   }
 
@@ -118,8 +110,8 @@ class DartPosition with _$DartPosition {
       ring: type == 'S'
           ? DartRing.single
           : type == 'D'
-              ? DartRing.double
-              : DartRing.triple,
+          ? DartRing.double
+          : DartRing.triple,
     );
   }
 

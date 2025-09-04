@@ -2,7 +2,7 @@ import 'dart:async';
 
 import '../data.dart';
 import '../models/count_up_game.dart';
-import '../models/dart_throw.dart';
+import '../shared/models/dart_throw.dart';
 
 class GameService {
   late CountUpGame _currentGame;
@@ -38,7 +38,7 @@ class GameService {
     try {
       final dartPosition = _extractDartPosition(rawData);
       if (dartPosition != null && _currentGame.isGameActive) {
-        final dartThrow = DartThrow.fromDartsLiveData(dartPosition);
+        final dartThrow = DartThrowX.fromDartsLiveData(dartPosition);
         _currentGame.addThrow(dartThrow);
         _gameStateController.add(_currentGame);
       }
@@ -62,7 +62,7 @@ class GameService {
 
   void addManualThrow(String position) {
     if (_currentGame.isGameActive) {
-      final dartThrow = DartThrow.fromDartsLiveData(position);
+      final dartThrow = DartThrowX.fromDartsLiveData(position);
       _currentGame.addThrow(dartThrow);
       _gameStateController.add(_currentGame);
     }

@@ -1,9 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ble_darts/features/count_up/data/multiplayer_count_up_provider.dart';
-import 'package:ble_darts/features/count_up/domain/multiplayer_count_up_game.dart';
 import 'package:ble_darts/features/count_up/domain/count_up_game.dart';
+import 'package:ble_darts/features/count_up/domain/multiplayer_count_up_game.dart';
 import 'package:ble_darts/shared/models/dart_throw.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('MultiplayerCountUpGameNotifier', () {
@@ -283,20 +283,21 @@ void main() {
       notifier.addManualThrow('S20'); // 20
       // 合計: 120
 
-      // ラウンド2: ブルスコア
-      notifier.addManualThrow('S-BULL'); // 50
+      // ラウンド2: ブルスコア (S-BULL=25, D-BULL=50)
+      notifier.addManualThrow('S-BULL'); // 25
       notifier.addManualThrow('D-BULL'); // 50
       notifier.addManualThrow('CHANGE'); // 0
-      // 合計: 100
+      // 合計: 75
 
       // Assert
       final game = container.read(multiplayerCountUpGameNotifierProvider);
       final playerData = game.players[0];
-      expect(playerData.game.totalScore, equals(220));
+      // 合計: ラウンド1(120) + ラウンド2(75) = 195
+      expect(playerData.game.totalScore, equals(195));
       expect(playerData.game.currentRound, equals(3));
       final roundScores = playerData.game.roundScores;
       expect(roundScores[0], equals(120));
-      expect(roundScores[1], equals(100));
+      expect(roundScores[1], equals(75));
     });
 
     test('Bluetoothデータを正しく処理できる', () {

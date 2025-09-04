@@ -1,4 +1,5 @@
-import 'dart_throw.dart';
+// Legacy CountUpGame model (kept for older screen/widgets). Updated to use shared DartThrow model.
+import '../shared/models/dart_throw.dart';
 
 enum GameState { waiting, playing, finished }
 
@@ -108,7 +109,7 @@ class CountUpGame {
             (round) => round
                 .map(
                   (dart) => {
-                    'position': dart.position,
+                    'position': dart.positionString,
                     'score': dart.score,
                     'timestamp': dart.timestamp.toIso8601String(),
                   },
