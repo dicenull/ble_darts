@@ -40,7 +40,8 @@ dependencies:
   universal_platform: ^1.0.0+1
 
   # State management
-  flutter_riverpod: ^2.6.1
+  hooks_riverpod: ^2.6.1
+  flutter_hooks: ^0.20.5
   riverpod_annotation: ^2.3.3
 
   # Code generation

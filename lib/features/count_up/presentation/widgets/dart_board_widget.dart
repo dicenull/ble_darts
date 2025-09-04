@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:ble_darts/shared/models/dart_board_model.dart';
+import 'package:ble_darts/shared/models/dart_position.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class DartBoardWidget extends StatefulWidget {
-  final String? highlightedPosition;
+class DartBoardWidget extends HookWidget {
+  final DartPosition? highlightedPosition;
   final Duration highlightDuration;
   final VoidCallback? onHighlightEnd;
   final Function(String position)? onPositionTapped;
@@ -18,73 +20,58 @@ class DartBoardWidget extends StatefulWidget {
   });
 
   @override
-  State<DartBoardWidget> createState() => _DartBoardWidgetState();
-}
-
-class _DartBoardWidgetState extends State<DartBoardWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _highlightController;
-  late Animation<double> _highlightAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _highlightController = AnimationController(
-      duration: widget.highlightDuration,
-      vsync: this,
-    );
-    _highlightAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _highlightController, curve: Curves.easeInOut),
-    );
-
-    _highlightController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _highlightController.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        widget.onHighlightEnd?.call();
-      }
-    });
-  }
-
-  @override
-  void didUpdateWidget(DartBoardWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.highlightedPosition != null &&
-        widget.highlightedPosition != oldWidget.highlightedPosition) {
-      _highlightController.forward();
-    }
-  }
-
-  @override
-  void dispose() {
-    _highlightController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final highlightController = useAnimationController(
+      duration: highlightDuration,
+    );
+    
+    final highlightAnimation = useAnimation(
+      Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: highlightController, curve: Curves.easeInOut),
+      ),
+    );
+
+    useEffect(() {
+      void listener(AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
+          highlightController.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          onHighlightEnd?.call();
+        }
+      }
+      
+      highlightController.addStatusListener(listener);
+      return () => highlightController.removeStatusListener(listener);
+    }, [highlightController]);
+
+    useEffect(() {
+      if (highlightedPosition != null) {
+        highlightController.forward();
+      }
+      return null;
+    }, [highlightedPosition]);
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = Size(constraints.maxWidth, constraints.maxHeight);
         return AnimatedBuilder(
-          animation: _highlightAnimation,
+          animation: highlightController,
           builder: (context, child) {
             return GestureDetector(
               onTapDown: (details) {
-                if (widget.onPositionTapped != null) {
+                if (onPositionTapped != null) {
                   final position = _getPositionFromOffset(
                     details.localPosition,
                     size,
                   );
                   if (position != null) {
-                    widget.onPositionTapped!(position);
+                    onPositionTapped!(position);
                   }
                 }
               },
               child: CustomPaint(
                 painter: DartBoardPainter(
-                  highlightedPosition: widget.highlightedPosition,
-                  highlightIntensity: _highlightAnimation.value,
+                  highlightedPosition: highlightedPosition,
+                  highlightIntensity: highlightAnimation,
                 ),
                 size: size,
               ),
@@ -101,7 +88,7 @@ class _DartBoardWidgetState extends State<DartBoardWidget>
 }
 
 class DartBoardPainter extends CustomPainter {
-  final String? highlightedPosition;
+  final DartPosition? highlightedPosition;
   final double highlightIntensity;
 
   DartBoardPainter({this.highlightedPosition, this.highlightIntensity = 0.0});
@@ -171,30 +158,16 @@ class DartBoardPainter extends CustomPainter {
   bool _isPositionHighlighted(int number) {
     if (highlightedPosition == null) return false;
 
-    if (highlightedPosition == 'D-BULL' || highlightedPosition == 'S-BULL') {
+    if (highlightedPosition!.number == 25) {
       return false;
     }
 
-    final regex = RegExp(r'([SDT])(\d+)');
-    final match = regex.firstMatch(highlightedPosition!);
-
-    if (match == null) return false;
-
-    final targetNumber = int.parse(match.group(2)!);
-    return targetNumber == number;
+    return highlightedPosition!.number == number;
   }
 
-  String? _getHighlightedType() {
+  DartRing? _getHighlightedType() {
     if (highlightedPosition == null) return null;
-
-    if (highlightedPosition == 'D-BULL' || highlightedPosition == 'S-BULL') {
-      return highlightedPosition;
-    }
-
-    final regex = RegExp(r'([SDT])(\d+)');
-    final match = regex.firstMatch(highlightedPosition!);
-
-    return match?.group(1);
+    return highlightedPosition!.ring;
   }
 
   void _drawSingleSegment(
@@ -219,7 +192,7 @@ class DartBoardPainter extends CustomPainter {
       startAngle,
       endAngle,
       colors.double,
-      highlightType == 'D' ? highlightMultiplier : 0.0,
+      highlightType == DartRing.double ? highlightMultiplier : 0.0,
     );
 
     // 外側シングル領域
@@ -231,7 +204,7 @@ class DartBoardPainter extends CustomPainter {
       startAngle,
       endAngle,
       colors.single,
-      highlightType == 'S' ? highlightMultiplier : 0.0,
+      highlightType == DartRing.single ? highlightMultiplier : 0.0,
     );
 
     // トリプル領域
@@ -243,7 +216,7 @@ class DartBoardPainter extends CustomPainter {
       startAngle,
       endAngle,
       colors.triple,
-      highlightType == 'T' ? highlightMultiplier : 0.0,
+      highlightType == DartRing.triple ? highlightMultiplier : 0.0,
     );
 
     // 内側シングル領域
@@ -255,7 +228,7 @@ class DartBoardPainter extends CustomPainter {
       startAngle,
       endAngle,
       colors.single,
-      highlightType == 'S' ? highlightMultiplier : 0.0,
+      highlightType == DartRing.single ? highlightMultiplier : 0.0,
     );
   }
 
@@ -326,10 +299,14 @@ class DartBoardPainter extends CustomPainter {
   }
 
   void _drawBullsEye(Canvas canvas, Offset center, double radius) {
-    final outerBullHighlight = highlightedPosition == 'S-BULL'
+    final outerBullHighlight = (highlightedPosition != null &&
+            highlightedPosition!.number == 25 &&
+            highlightedPosition!.ring == DartRing.single)
         ? highlightIntensity
         : 0.0;
-    final innerBullHighlight = highlightedPosition == 'D-BULL'
+    final innerBullHighlight = (highlightedPosition != null &&
+            highlightedPosition!.number == 25 &&
+            highlightedPosition!.ring == DartRing.double)
         ? highlightIntensity
         : 0.0;
 

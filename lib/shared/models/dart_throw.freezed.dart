@@ -21,7 +21,7 @@ DartThrow _$DartThrowFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$DartThrow {
-  String get position => throw _privateConstructorUsedError;
+  DartPosition get position => throw _privateConstructorUsedError;
   int get score => throw _privateConstructorUsedError;
   DateTime get timestamp => throw _privateConstructorUsedError;
 
@@ -40,7 +40,9 @@ abstract class $DartThrowCopyWith<$Res> {
   factory $DartThrowCopyWith(DartThrow value, $Res Function(DartThrow) then) =
       _$DartThrowCopyWithImpl<$Res, DartThrow>;
   @useResult
-  $Res call({String position, int score, DateTime timestamp});
+  $Res call({DartPosition position, int score, DateTime timestamp});
+
+  $DartPositionCopyWith<$Res> get position;
 }
 
 /// @nodoc
@@ -67,7 +69,7 @@ class _$DartThrowCopyWithImpl<$Res, $Val extends DartThrow>
             position: null == position
                 ? _value.position
                 : position // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as DartPosition,
             score: null == score
                 ? _value.score
                 : score // ignore: cast_nullable_to_non_nullable
@@ -80,6 +82,16 @@ class _$DartThrowCopyWithImpl<$Res, $Val extends DartThrow>
           as $Val,
     );
   }
+
+  /// Create a copy of DartThrow
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $DartPositionCopyWith<$Res> get position {
+    return $DartPositionCopyWith<$Res>(_value.position, (value) {
+      return _then(_value.copyWith(position: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -91,7 +103,10 @@ abstract class _$$DartThrowImplCopyWith<$Res>
   ) = __$$DartThrowImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String position, int score, DateTime timestamp});
+  $Res call({DartPosition position, int score, DateTime timestamp});
+
+  @override
+  $DartPositionCopyWith<$Res> get position;
 }
 
 /// @nodoc
@@ -117,7 +132,7 @@ class __$$DartThrowImplCopyWithImpl<$Res>
         position: null == position
             ? _value.position
             : position // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as DartPosition,
         score: null == score
             ? _value.score
             : score // ignore: cast_nullable_to_non_nullable
@@ -133,18 +148,18 @@ class __$$DartThrowImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$DartThrowImpl implements _DartThrow {
+class _$DartThrowImpl extends _DartThrow {
   const _$DartThrowImpl({
     required this.position,
     required this.score,
     required this.timestamp,
-  });
+  }) : super._();
 
   factory _$DartThrowImpl.fromJson(Map<String, dynamic> json) =>
       _$$DartThrowImplFromJson(json);
 
   @override
-  final String position;
+  final DartPosition position;
   @override
   final int score;
   @override
@@ -185,18 +200,19 @@ class _$DartThrowImpl implements _DartThrow {
   }
 }
 
-abstract class _DartThrow implements DartThrow {
+abstract class _DartThrow extends DartThrow {
   const factory _DartThrow({
-    required final String position,
+    required final DartPosition position,
     required final int score,
     required final DateTime timestamp,
   }) = _$DartThrowImpl;
+  const _DartThrow._() : super._();
 
   factory _DartThrow.fromJson(Map<String, dynamic> json) =
       _$DartThrowImpl.fromJson;
 
   @override
-  String get position;
+  DartPosition get position;
   @override
   int get score;
   @override

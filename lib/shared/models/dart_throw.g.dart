@@ -8,7 +8,7 @@ part of 'dart_throw.dart';
 
 _$DartThrowImpl _$$DartThrowImplFromJson(Map<String, dynamic> json) =>
     _$DartThrowImpl(
-      position: json['position'] as String,
+      position: DartPosition.fromJson(json['position'] as Map<String, dynamic>),
       score: (json['score'] as num).toInt(),
       timestamp: DateTime.parse(json['timestamp'] as String),
     );

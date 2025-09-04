@@ -208,7 +208,7 @@ class CurrentRoundWidget extends StatelessWidget {
                       const SizedBox(height: 4),
                       if (hasThrow) ...[
                         Text(
-                          currentRoundThrows[index].position,
+                          currentRoundThrows[index].positionString,
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
